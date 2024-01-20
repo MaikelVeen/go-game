@@ -1,4 +1,4 @@
-package main
+package ecs
 
 // MaxEntities is the maximum number of entities that can be created.
 const MaxEntities uint32 = 1024

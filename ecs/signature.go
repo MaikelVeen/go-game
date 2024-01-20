@@ -1,4 +1,4 @@
-package main
+package ecs
 
 // Signature represents a bitset of component types.
 type Signature struct {
