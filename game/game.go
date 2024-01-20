@@ -3,13 +3,22 @@ package game
 import (
 	"fmt"
 
+	"github.com/MaikelVeen/go-game/ecs"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 var _ ebiten.Game = &Game{}
 
-type Game struct{}
+type Game struct {
+	systems []ecs.System
+}
+
+// WithSystems adds systems to the game.
+func (g *Game) WithSystems(systems ...ecs.System) *Game {
+	g.systems = append(g.systems, systems...)
+	return g
+}
 
 func New() *Game {
 	return &Game{}
