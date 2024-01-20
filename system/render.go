@@ -5,12 +5,24 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-// Ensure RenderSystem implements System.
 var _ ecs.System = &RenderSystem{}
 
 type RenderSystem struct {
-	// Reference to screen.
-	screen *ebiten.Image
+	screen   *ebiten.Image
+	entities []ecs.Entity
+}
+
+func (s *RenderSystem) AddEntity(entity ecs.Entity) {
+	s.entities = append(s.entities, entity)
+}
+
+func (s *RenderSystem) EntityDestroyed(entity ecs.Entity) {
+	for i, e := range s.entities {
+		if e == entity {
+			s.entities = append(s.entities[:i], s.entities[i+1:]...)
+			break
+		}
+	}
 }
 
 func NewRenderSystem(screen *ebiten.Image) *RenderSystem {

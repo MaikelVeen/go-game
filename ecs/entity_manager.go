@@ -38,7 +38,7 @@ func (em *EntityManager) Destroy(id Entity) error {
 		return fmt.Errorf("invalid entity ID")
 	}
 
-	em.signatures[id].Bitset = 0
+	em.signatures[id] = 0
 	em.entityCount--
 
 	return nil
