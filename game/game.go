@@ -3,7 +3,6 @@ package game
 import (
 	"fmt"
 	"log/slog"
-	"reflect"
 
 	"github.com/MaikelVeen/go-game/components"
 	"github.com/MaikelVeen/go-game/ecs"
@@ -24,16 +23,12 @@ type Game struct {
 	systems []ecs.System
 }
 
+// TODO: New Should take a list of dependencies and logger.
 func New() *Game {
 	g := &Game{
 		entityManager:    ecs.NewEntityManager(),
 		componentManager: ecs.NewComponentManager(),
 		systemManager:    ecs.NewSystemManager(),
-	}
-
-	if err := g.registerComponentTypes(); err != nil {
-		slog.Error(err.Error())
-		panic(err)
 	}
 
 	if err := g.registerSystems(); err != nil {
@@ -54,33 +49,15 @@ func (g *Game) Init() *Game {
 	return g
 }
 
-// registerComponentTypes registers all component types.
-func (g *Game) registerComponentTypes() error {
-	// SpriteRender.
-	if _, err := g.componentManager.RegisterComponentType(
-		reflect.TypeOf(&components.SpriteRender{}),
-	); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// registerSystems registers all systems.
 func (g *Game) registerSystems() error {
 	// Register RenderSystem.
-	renderSystem := system.NewRenderSystem()
+	renderSystem := system.NewRenderSystem(g.componentManager)
 	g.systemManager.RegisterSystem(renderSystem)
-
-	// Get Type of SpriteRender component.
-	spriteRenderComponentType, err := g.componentManager.Type(reflect.TypeOf(&components.SpriteRender{}))
-	if err != nil {
-		return err
-	}
 
 	// Set signature for RenderSystem.
 	signature := ecs.NewSignature(
-		spriteRenderComponentType,
+		ecs.ComponentType(components.TransformComponentType),
+		ecs.ComponentType(components.SpriteRenderComponentType),
 	)
 	g.systemManager.SetSignature(renderSystem, signature)
 
@@ -95,7 +72,17 @@ func (g *Game) createEntities() error {
 
 	if err := g.componentManager.AddComponent(
 		player,
-		reflect.TypeOf(&components.SpriteRender{}),
+		ecs.ComponentType(components.TransformComponentType),
+		&components.Transform{
+			X: 10, Y: 10,
+		},
+	); err != nil {
+		return err
+	}
+
+	if err := g.componentManager.AddComponent(
+		player,
+		ecs.ComponentType(components.SpriteRenderComponentType),
 		&components.SpriteRender{},
 	); err != nil {
 		return err

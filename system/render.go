@@ -1,6 +1,7 @@
 package system
 
 import (
+	"github.com/MaikelVeen/go-game/components"
 	"github.com/MaikelVeen/go-game/ecs"
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -8,7 +9,8 @@ import (
 var _ ecs.System = &RenderSystem{}
 
 type RenderSystem struct {
-	entities []ecs.Entity
+	componentManager *ecs.ComponentManager
+	entities         []ecs.Entity
 }
 
 func (s *RenderSystem) AddEntity(entity ecs.Entity) {
@@ -24,8 +26,10 @@ func (s *RenderSystem) EntityDestroyed(entity ecs.Entity) {
 	}
 }
 
-func NewRenderSystem() *RenderSystem {
-	return &RenderSystem{}
+func NewRenderSystem(cm *ecs.ComponentManager) *RenderSystem {
+	return &RenderSystem{
+		componentManager: cm,
+	}
 }
 
 func (s *RenderSystem) Update() error {
@@ -33,5 +37,27 @@ func (s *RenderSystem) Update() error {
 }
 
 func (s *RenderSystem) Draw(screen *ebiten.Image) {
-	println("rendering")
+	for _, entity := range s.entities {
+		t, err := s.componentManager.GetComponent(entity, ecs.ComponentType(components.TransformComponentType))
+		if err != nil {
+			// TODO : Log an error here.
+			panic(err)
+		}
+		tranform := t.(*components.Transform)
+
+		spriteRender, err := s.componentManager.GetComponent(entity, ecs.ComponentType(components.SpriteRenderComponentType))
+		if err != nil {
+			// TODO : Log an error here.
+			panic(err)
+		}
+		sr := spriteRender.(*components.SpriteRender)
+
+		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Translate(
+			float64(tranform.X),
+			float64(tranform.Y),
+		)
+
+		screen.DrawImage(sr.Image, op)
+	}
 }

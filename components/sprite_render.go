@@ -1,7 +1,9 @@
 package components
 
-type SpriteRender struct{}
+import "github.com/hajimehoshi/ebiten/v2"
 
-func (sr *SpriteRender) Render() {
-	println("rendering")
+const SpriteRenderComponentType uint8 = 1
+
+type SpriteRender struct {
+	Image *ebiten.Image
 }
