@@ -45,17 +45,15 @@ func (cs *ComponentStore[T]) Remove(entity Entity) error {
 		return fmt.Errorf("removing non-existent component")
 	}
 
-	// Copy element at end into deleted element's place to maintain density
-	lastIndex := cs.size - 1
-	cs.components[indexOfRemovedEntity] = cs.components[lastIndex]
+	indexOfLastElement := cs.size - 1
+	cs.components[indexOfRemovedEntity] = cs.components[indexOfLastElement]
 
-	// Update map to point to moved spot
-	lastEntity := cs.indexToEntityMap[lastIndex]
-	cs.entityToIndexMap[lastEntity] = indexOfRemovedEntity
+	entityOfLastElement := cs.indexToEntityMap[indexOfLastElement]
+	cs.entityToIndexMap[entityOfLastElement] = indexOfRemovedEntity
+	cs.indexToEntityMap[indexOfRemovedEntity] = entityOfLastElement
 
-	// Remove map entries for deleted entity
 	delete(cs.entityToIndexMap, entity)
-	delete(cs.indexToEntityMap, lastIndex)
+	delete(cs.indexToEntityMap, indexOfLastElement)
 
 	cs.size--
 	return nil
