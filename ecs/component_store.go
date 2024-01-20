@@ -2,6 +2,10 @@ package ecs
 
 import "fmt"
 
+type Store interface {
+	EntityDesroyed(entity Entity)
+}
+
 type ComponentStore[T any] struct {
 	// Packed slice of components set to a sp
 	components [MaxEntities]T
@@ -67,4 +71,13 @@ func (ca *ComponentStore[T]) Component(entity Entity) (T, error) {
 		return zero, fmt.Errorf("retrieving non-existent component")
 	}
 	return ca.components[index], nil
+}
+
+// EnityDestroy is called when an entity is destroyed.
+func (cs *ComponentStore[T]) EntityDestroy(entity Entity) {
+	if _, exists := cs.entityToIndexMap[entity]; !exists {
+		return
+	}
+
+	cs.Remove(entity)
 }
