@@ -11,7 +11,7 @@ func TestComponentStore(t *testing.T) {
 		value rune
 	}
 
-	cs := NewComponentStore[TestComponent]()
+	cs := NewComponentStore()
 
 	// Add component A to entity 0
 	entity0 := Entity(0)

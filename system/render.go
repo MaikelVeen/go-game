@@ -8,7 +8,6 @@ import (
 var _ ecs.System = &RenderSystem{}
 
 type RenderSystem struct {
-	screen   *ebiten.Image
 	entities []ecs.Entity
 }
 
@@ -25,12 +24,14 @@ func (s *RenderSystem) EntityDestroyed(entity ecs.Entity) {
 	}
 }
 
-func NewRenderSystem(screen *ebiten.Image) *RenderSystem {
-	return &RenderSystem{
-		screen: screen,
-	}
+func NewRenderSystem() *RenderSystem {
+	return &RenderSystem{}
 }
 
-func (s *RenderSystem) Update() {
+func (s *RenderSystem) Update() error {
+	return nil // Noop.
+}
 
+func (s *RenderSystem) Draw(screen *ebiten.Image) {
+	println("rendering")
 }

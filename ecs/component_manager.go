@@ -8,36 +8,37 @@ import (
 // ComponentManager is a struct that holds all the components types
 // and their underlying stores.
 type ComponentManager struct {
-	types    map[reflect.Type]ComponentType
-	stores   map[reflect.Type]Store
-	nextType ComponentType
+	componentTypes  map[reflect.Type]ComponentType
+	componentStores map[reflect.Type]Store
+	nextType        ComponentType
 }
 
 // NewComponentManager creates a new component registry.
 func NewComponentManager() *ComponentManager {
 	return &ComponentManager{
-		types:    make(map[reflect.Type]ComponentType),
-		stores:   make(map[reflect.Type]Store),
-		nextType: 1,
+		componentTypes:  make(map[reflect.Type]ComponentType),
+		componentStores: make(map[reflect.Type]Store),
+		nextType:        1,
 	}
 }
 
 // RegisterType registers a component type and its store.
-func (cm *ComponentManager) RegisterType(componentType reflect.Type, store Store) error {
-	if _, exists := cm.types[componentType]; exists {
-		return fmt.Errorf("component type already registered")
+// Returns the component type and an error if the component type is already registered.
+func (cm *ComponentManager) RegisterComponentType(componentType reflect.Type) (ComponentType, error) {
+	if _, exists := cm.componentTypes[componentType]; exists {
+		return 0, fmt.Errorf("component type already registered")
 	}
 
-	cm.types[componentType] = cm.nextType
-	cm.stores[componentType] = store
+	cm.componentTypes[componentType] = cm.nextType
+	cm.componentStores[componentType] = NewComponentStore()
 	cm.nextType++
 
-	return nil
+	return cm.nextType - 1, nil
 }
 
 // Type returns the component type for a given component type.
 func (cm *ComponentManager) Type(componentType reflect.Type) (ComponentType, error) {
-	ct, exists := cm.types[componentType]
+	ct, exists := cm.componentTypes[componentType]
 	if !exists {
 		return 0, fmt.Errorf("component type not registered")
 	}
@@ -46,31 +47,31 @@ func (cm *ComponentManager) Type(componentType reflect.Type) (ComponentType, err
 }
 
 func (cm *ComponentManager) AddComponent(entity Entity, componentType reflect.Type, component any) error {
-	store, exists := cm.stores[componentType]
+	store, exists := cm.componentStores[componentType]
 	if !exists {
 		return fmt.Errorf("component type not registered")
 	}
-	return store.AddComponent(entity, component)
+	return store.Add(entity, component)
 }
 
 func (cm *ComponentManager) RemoveComponent(entity Entity, componentType reflect.Type) error {
-	store, exists := cm.stores[componentType]
+	store, exists := cm.componentStores[componentType]
 	if !exists {
 		return fmt.Errorf("component type not registered")
 	}
-	return store.RemoveComponent(entity)
+	return store.Remove(entity)
 }
 
 func (cm *ComponentManager) GetComponent(entity Entity, componentType reflect.Type) (any, error) {
-	store, exists := cm.stores[componentType]
+	store, exists := cm.componentStores[componentType]
 	if !exists {
 		return nil, fmt.Errorf("component type not registered")
 	}
-	return store.GetComponent(entity)
+	return store.Component(entity)
 }
 
 func (cm *ComponentManager) EntityDestroyed(entity Entity) {
-	for _, store := range cm.stores {
-		store.EntityDesroyed(entity)
+	for _, store := range cm.componentStores {
+		store.EntityDestroy(entity)
 	}
 }

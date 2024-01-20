@@ -3,15 +3,18 @@ package ecs
 import "fmt"
 
 type Store interface {
-	EntityDesroyed(entity Entity)
-	AddComponent(entity Entity, component any) error
-	RemoveComponent(entity Entity) error
-	GetComponent(entity Entity) (any, error)
+	EntityDestroy(entity Entity)
+
+	Add(entity Entity, component any) error
+	Remove(entity Entity) error
+	Component(entity Entity) (any, error)
 }
 
-type ComponentStore[T any] struct {
+var _ Store = &ComponentStore{}
+
+type ComponentStore struct {
 	// Packed slice of components set to a sp
-	components [MaxEntities]T
+	components [MaxEntities]any
 	// Map from an entity ID to an array index.
 	entityToIndexMap map[Entity]int
 	// Map from an array index to an entity ID.
@@ -21,9 +24,9 @@ type ComponentStore[T any] struct {
 }
 
 // NewComponentStore creates a new component store.
-func NewComponentStore[T any]() *ComponentStore[T] {
-	return &ComponentStore[T]{
-		components:       [MaxEntities]T{},
+func NewComponentStore() *ComponentStore {
+	return &ComponentStore{
+		components:       [MaxEntities]any{},
 		entityToIndexMap: make(map[Entity]int),
 		indexToEntityMap: make(map[int]Entity),
 		size:             0,
@@ -31,7 +34,7 @@ func NewComponentStore[T any]() *ComponentStore[T] {
 }
 
 // Add adds a component to an entity.
-func (cs *ComponentStore[T]) Add(entity Entity, component T) error {
+func (cs *ComponentStore) Add(entity Entity, component any) error {
 	if _, exists := cs.entityToIndexMap[entity]; exists {
 		return fmt.Errorf("component added to same entity more than once")
 	}
@@ -46,7 +49,7 @@ func (cs *ComponentStore[T]) Add(entity Entity, component T) error {
 }
 
 // Remove removes a component from an entity.
-func (cs *ComponentStore[T]) Remove(entity Entity) error {
+func (cs *ComponentStore) Remove(entity Entity) error {
 	indexOfRemovedEntity, exists := cs.entityToIndexMap[entity]
 	if !exists {
 		return fmt.Errorf("removing non-existent component")
@@ -67,17 +70,17 @@ func (cs *ComponentStore[T]) Remove(entity Entity) error {
 }
 
 // Component gets the component data for an entity.
-func (ca *ComponentStore[T]) Component(entity Entity) (T, error) {
+func (ca *ComponentStore) Component(entity Entity) (any, error) {
 	index, exists := ca.entityToIndexMap[entity]
 	if !exists {
-		var zero T
+		var zero any
 		return zero, fmt.Errorf("retrieving non-existent component")
 	}
 	return ca.components[index], nil
 }
 
 // EnityDestroy is called when an entity is destroyed.
-func (cs *ComponentStore[T]) EntityDestroy(entity Entity) {
+func (cs *ComponentStore) EntityDestroy(entity Entity) {
 	if _, exists := cs.entityToIndexMap[entity]; !exists {
 		return
 	}
