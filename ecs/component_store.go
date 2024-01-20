@@ -4,6 +4,9 @@ import "fmt"
 
 type Store interface {
 	EntityDesroyed(entity Entity)
+	AddComponent(entity Entity, component any) error
+	RemoveComponent(entity Entity) error
+	GetComponent(entity Entity) (any, error)
 }
 
 type ComponentStore[T any] struct {
