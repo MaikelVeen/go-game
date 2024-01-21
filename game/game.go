@@ -3,9 +3,10 @@ package game
 import (
 	"fmt"
 	"log/slog"
+	"reflect"
 
-	"github.com/MaikelVeen/go-game/assets"
-	"github.com/MaikelVeen/go-game/components"
+	"github.com/MaikelVeen/go-game/component"
+	"github.com/MaikelVeen/go-game/data"
 	"github.com/MaikelVeen/go-game/ecs"
 	"github.com/MaikelVeen/go-game/system"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -15,12 +16,17 @@ import (
 var _ ebiten.Game = &Game{}
 
 type Game struct {
+	config      *data.GameConfig
 	coordinator *ecs.Coordinator
 }
 
 // TODO: Inject Logger.
-func New(coordinator *ecs.Coordinator) *Game {
+func New(
+	config *data.GameConfig,
+	coordinator *ecs.Coordinator,
+) *Game {
 	g := &Game{
+		config:      config,
 		coordinator: coordinator,
 	}
 
@@ -48,8 +54,8 @@ func (g *Game) registerSystems() error {
 
 	// Set signature for RenderSystem.
 	signature := ecs.NewSignature(
-		ecs.ComponentType(components.TransformComponentType),
-		ecs.ComponentType(components.SpriteRenderComponentType),
+		ecs.ComponentType(component.TransformComponentType),
+		ecs.ComponentType(component.SpriteRenderComponentType),
 	)
 	g.coordinator.SetSystemSignature(system.RenderSystemType, signature)
 
@@ -61,7 +67,7 @@ func (g *Game) registerSystems() error {
 
 	// Set signature for InputSystem.
 	signature = ecs.NewSignature(
-		ecs.ComponentType(components.PlayerControllerType),
+		ecs.ComponentType(component.PlayerControllerType),
 	)
 	g.coordinator.SetSystemSignature(system.InputSystemType, signature)
 
@@ -69,29 +75,43 @@ func (g *Game) registerSystems() error {
 }
 
 func (g *Game) createEntities() error {
-	player, err := g.coordinator.CreateEntity()
-	if err != nil {
-		return err
-	}
+	// Create entities.
+	for _, entityConfig := range g.config.Entities {
+		entity, err := g.coordinator.CreateEntity()
+		if err != nil {
+			return err
+		}
 
-	if err := g.coordinator.AddComponent(
-		player,
-		ecs.ComponentType(components.TransformComponentType),
-		&components.Transform{
-			X: 100, Y: 100,
-		},
-	); err != nil {
-		return err
-	}
+		// Add components to entity.
+		for _, componentConfig := range entityConfig.Components {
+			componentType, exists := component.ComponentMapping[componentConfig.Type]
+			if !exists {
+				return fmt.Errorf("unknown component type: %s", componentConfig.Type)
+			}
 
-	if err := g.coordinator.AddComponent(
-		player,
-		ecs.ComponentType(components.SpriteRenderComponentType),
-		&components.SpriteRender{
-			Image: assets.PlayerIdle,
-		},
-	); err != nil {
-		return err
+			reflectType, exists := component.ComponentTypeMapping[componentType]
+			if !exists {
+				return fmt.Errorf("no reflect type found for component type: %d", componentType)
+			}
+
+			newComponentPtr := reflect.New(reflectType).Interface()
+			newComponent, ok := newComponentPtr.(component.Component)
+			if !ok {
+				return fmt.Errorf("component does not implement Component interface: %s", componentConfig.Type)
+			}
+
+			if err := newComponent.SetData(componentConfig.Data); err != nil {
+				return err
+			}
+
+			if err := g.coordinator.AddComponent(
+				entity,
+				ecs.ComponentType(componentType),
+				newComponent,
+			); err != nil {
+				return err
+			}
+		}
 	}
 
 	return nil

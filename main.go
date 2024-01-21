@@ -3,6 +3,7 @@ package main
 import (
 	"log/slog"
 
+	"github.com/MaikelVeen/go-game/data"
 	"github.com/MaikelVeen/go-game/ecs"
 	"github.com/MaikelVeen/go-game/game"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -24,7 +25,13 @@ func main() {
 		ecs.NewSystemManager(),
 	)
 
-	game := game.New(coordinator)
+	config, err := data.LoadConfig("game.yaml")
+	if err != nil {
+		slog.Error(err.Error())
+		panic(err)
+	}
+
+	game := game.New(config, coordinator)
 
 	if err := ebiten.RunGame(game); err != nil {
 		slog.Error(err.Error())

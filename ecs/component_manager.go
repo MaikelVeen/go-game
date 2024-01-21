@@ -17,6 +17,7 @@ func NewComponentManager() *ComponentManager {
 		componentStores: map[ComponentType]*ComponentStore[any]{
 			0: NewComponentStore[any](), // Transform
 			1: NewComponentStore[any](), // SpriteRender
+			2: NewComponentStore[any](), // PlayerController
 		},
 	}
 }

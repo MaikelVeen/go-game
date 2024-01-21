@@ -1,7 +1,7 @@
 package system
 
 import (
-	"github.com/MaikelVeen/go-game/components"
+	"github.com/MaikelVeen/go-game/component"
 	"github.com/MaikelVeen/go-game/ecs"
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -52,19 +52,19 @@ func (s *RenderSystem) Draw(screen *ebiten.Image) {
 	s.offScreenImage.Clear()
 
 	for entity := range s.entities {
-		t, err := s.componentManager.GetComponent(entity, ecs.ComponentType(components.TransformComponentType))
+		t, err := s.componentManager.GetComponent(entity, ecs.ComponentType(component.TransformComponentType))
 		if err != nil {
 			// TODO : Log an error here.
 			panic(err)
 		}
-		tranform := t.(*components.Transform)
+		tranform := t.(*component.Transform)
 
-		spriteRender, err := s.componentManager.GetComponent(entity, ecs.ComponentType(components.SpriteRenderComponentType))
+		spriteRender, err := s.componentManager.GetComponent(entity, ecs.ComponentType(component.SpriteRenderComponentType))
 		if err != nil {
 			// TODO : Log an error here.
 			panic(err)
 		}
-		sr := spriteRender.(*components.SpriteRender)
+		sr := spriteRender.(*component.SpriteRender)
 
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(

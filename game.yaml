@@ -1,0 +1,11 @@
+entities:
+  - name: "player"
+    components:
+      - type: "transform"
+        data:
+          x: 10
+          y: 10
+      - type: "spriteRender"
+        data:
+          sprite: "player_sprite.png"
+      - type: "playerController"
