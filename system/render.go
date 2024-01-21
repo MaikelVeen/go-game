@@ -6,7 +6,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-const RenderSystemType ecs.SystemType = 1
+const RenderSystemType ecs.SystemType = 0
 
 var _ ecs.System = &RenderSystem{}
 

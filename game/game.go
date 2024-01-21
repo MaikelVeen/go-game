@@ -53,6 +53,18 @@ func (g *Game) registerSystems() error {
 	)
 	g.coordinator.SetSystemSignature(system.RenderSystemType, signature)
 
+	// Register InputSystem.
+	inputSystem := system.NewInputSystem(
+		g.coordinator.ComponentManager,
+	)
+	g.coordinator.RegisterSystem(system.InputSystemType, inputSystem)
+
+	// Set signature for InputSystem.
+	signature = ecs.NewSignature(
+		ecs.ComponentType(components.PlayerControllerType),
+	)
+	g.coordinator.SetSystemSignature(system.InputSystemType, signature)
+
 	return nil
 }
 
@@ -66,7 +78,7 @@ func (g *Game) createEntities() error {
 		player,
 		ecs.ComponentType(components.TransformComponentType),
 		&components.Transform{
-			X: 10, Y: 10,
+			X: 100, Y: 100,
 		},
 	); err != nil {
 		return err
