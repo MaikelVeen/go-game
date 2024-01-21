@@ -1,15 +1,13 @@
 package input
 
 import (
-	"image/color"
+	"fmt"
 	"log/slog"
-	"strings"
 
 	"github.com/MaikelVeen/go-game/ecs"
-	"github.com/hajimehoshi/bitmapfont/v3"
+	"github.com/MaikelVeen/go-game/types"
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/inpututil"
-	"github.com/hajimehoshi/ebiten/v2/text"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 const SystemType ecs.SystemType = 0
@@ -20,13 +18,14 @@ type InputSystem struct {
 	componentManager *ecs.ComponentManager
 	entities         map[ecs.Entity]struct{}
 
-	keys []ebiten.Key
+	currentDirection *types.Vector2
 }
 
 func New(cm *ecs.ComponentManager) *InputSystem {
 	return &InputSystem{
 		componentManager: cm,
 		entities:         make(map[ecs.Entity]struct{}),
+		currentDirection: &types.Vector2{},
 	}
 }
 
@@ -45,27 +44,42 @@ func (s *InputSystem) EntityDestroyed(entity ecs.Entity) {
 
 // Draw implements ecs.System.
 func (s *InputSystem) Draw(screen *ebiten.Image) {
-	var keyStrs []string
-	var keyNames []string
-	for _, k := range s.keys {
-		keyStrs = append(keyStrs, k.String())
-		if name := ebiten.KeyName(k); name != "" {
-			keyNames = append(keyNames, name)
-		}
-	}
-
-	text.Draw(
+	ebitenutil.DebugPrintAt(
 		screen,
-		strings.Join(keyStrs, ", ")+"\n"+strings.Join(keyNames, ", "),
-		bitmapfont.Face,
+		fmt.Sprintf(
+			"Input direction X: %f, Y: %f",
+			s.currentDirection.X,
+			s.currentDirection.Y),
 		0,
-		40,
-		color.White,
+		15,
 	)
 }
 
 // Update implements ecs.System.
 func (s *InputSystem) Update() error {
-	s.keys = inpututil.AppendPressedKeys(s.keys[:0])
+	s.currentDirection = s.Direction()
 	return nil
+}
+
+// Direction returns the direction of the input.
+func (s *InputSystem) Direction() *types.Vector2 {
+	var direction types.Vector2
+
+	if UpKeys.PressedAny() {
+		direction.Y = -1
+	}
+
+	if DownKeys.PressedAny() {
+		direction.Y = 1
+	}
+
+	if LeftKeys.PressedAny() {
+		direction.X = -1
+	}
+
+	if RightKeys.PressedAny() {
+		direction.X = 1
+	}
+
+	return &direction
 }
