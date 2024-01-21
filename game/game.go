@@ -13,22 +13,14 @@ import (
 
 var _ ebiten.Game = &Game{}
 
-// Game is the main game struct.
-// It encapsulates the entity-component-system (ECS) architecture.
 type Game struct {
-	entityManager    *ecs.EntityManager
-	componentManager *ecs.ComponentManager
-	systemManager    *ecs.SystemManager
-
-	systems []ecs.System
+	coordinator *ecs.Coordinator
 }
 
-// TODO: New Should take a list of dependencies and logger.
-func New() *Game {
+// TODO: Inject Logger.
+func New(coordinator *ecs.Coordinator) *Game {
 	g := &Game{
-		entityManager:    ecs.NewEntityManager(),
-		componentManager: ecs.NewComponentManager(),
-		systemManager:    ecs.NewSystemManager(),
+		coordinator: coordinator,
 	}
 
 	if err := g.registerSystems(); err != nil {
@@ -44,33 +36,28 @@ func New() *Game {
 	return g
 }
 
-func (g *Game) Init() *Game {
-	// TODO: Add init logic here for systems.
-	return g
-}
-
 func (g *Game) registerSystems() error {
 	// Register RenderSystem.
-	renderSystem := system.NewRenderSystem(g.componentManager)
-	g.systemManager.RegisterSystem(renderSystem)
+	renderSystem := system.NewRenderSystem(g.coordinator.ComponentManager)
+	g.coordinator.RegisterSystem(renderSystem)
 
 	// Set signature for RenderSystem.
 	signature := ecs.NewSignature(
 		ecs.ComponentType(components.TransformComponentType),
 		ecs.ComponentType(components.SpriteRenderComponentType),
 	)
-	g.systemManager.SetSignature(renderSystem, signature)
+	g.coordinator.SetSystemSignature(renderSystem, signature)
 
 	return nil
 }
 
 func (g *Game) createEntities() error {
-	player, err := g.entityManager.Create()
+	player, err := g.coordinator.CreateEntity()
 	if err != nil {
 		return err
 	}
 
-	if err := g.componentManager.AddComponent(
+	if err := g.coordinator.AddComponent(
 		player,
 		ecs.ComponentType(components.TransformComponentType),
 		&components.Transform{
@@ -80,7 +67,7 @@ func (g *Game) createEntities() error {
 		return err
 	}
 
-	if err := g.componentManager.AddComponent(
+	if err := g.coordinator.AddComponent(
 		player,
 		ecs.ComponentType(components.SpriteRenderComponentType),
 		&components.SpriteRender{},
@@ -92,20 +79,12 @@ func (g *Game) createEntities() error {
 }
 
 func (g *Game) Update() error {
-	for _, system := range g.systems {
-		if err := system.Update(); err != nil {
-			return err
-		}
-	}
-	return nil
+	return g.coordinator.Update()
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %0.2f", ebiten.ActualTPS()))
-
-	for _, system := range g.systems {
-		system.Draw(screen)
-	}
+	g.coordinator.Draw(screen)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {

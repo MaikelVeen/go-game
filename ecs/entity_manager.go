@@ -2,6 +2,8 @@ package ecs
 
 import (
 	"fmt"
+
+	"github.com/bits-and-blooms/bitset"
 )
 
 // EntityManager manages entities.
@@ -11,16 +13,14 @@ type EntityManager struct {
 	entityCount uint32
 }
 
-// NewEntityManager creates a new entity manager.
 func NewEntityManager() *EntityManager {
 	return &EntityManager{
 		nextID:      0,
-		signatures:  [MaxEntities]Signature{},
+		signatures:  [MaxEntities]*bitset.BitSet{},
 		entityCount: 0,
 	}
 }
 
-// Create creates a new entity.
 func (em *EntityManager) Create() (Entity, error) {
 	if em.entityCount >= MaxEntities {
 		return 0, fmt.Errorf("too many entities")
@@ -29,36 +29,36 @@ func (em *EntityManager) Create() (Entity, error) {
 	id := Entity(em.nextID)
 	em.nextID++
 
+	em.signatures[id] = bitset.New(MaxComponents)
+	em.entityCount++
+
 	return id, nil
 }
 
-// Destroy destroys an entity.
 func (em *EntityManager) Destroy(id Entity) error {
 	if uint32(id) >= MaxEntities {
 		return fmt.Errorf("invalid entity ID")
 	}
 
-	em.signatures[id] = 0
+	em.signatures[id].ClearAll()
 	em.entityCount--
 
 	return nil
 }
 
-// SetSignature sets the signature of an entity.
-func (em *EntityManager) SetSignature(id Entity, signature *Signature) error {
+func (em *EntityManager) SetSignature(id Entity, sig Signature) error {
 	if uint32(id) >= MaxEntities {
 		return fmt.Errorf("invalid entity ID")
 	}
 
-	em.signatures[id] = *signature
+	em.signatures[id] = sig
 	return nil
 }
 
-// Signature gets the signature of an entity.
-func (em *EntityManager) Signature(id Entity) (*Signature, error) {
+func (em *EntityManager) Signature(id Entity) (Signature, error) {
 	if uint32(id) >= MaxEntities {
 		return nil, fmt.Errorf("invalid entity ID")
 	}
 
-	return &em.signatures[id], nil
+	return em.signatures[id], nil
 }

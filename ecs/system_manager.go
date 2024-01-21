@@ -4,6 +4,8 @@ import (
 	"reflect"
 )
 
+// TODO: Get Rid of the reflect package.
+
 // SystemManager manages systems and their signatures
 type SystemManager struct {
 	systems    map[reflect.Type]System
@@ -35,13 +37,13 @@ func (sm *SystemManager) RegisterSystem(sys System) {
 	sm.systems[sysType] = sys
 }
 
-func (sm *SystemManager) SetSignature(sys System, signature Signature) {
+func (sm *SystemManager) SetSignature(sys System, sig Signature) {
 	sysType := reflect.TypeOf(sys)
 	if _, exists := sm.systems[sysType]; !exists {
 		panic("System used before registered")
 	}
 
-	sm.signatures[sysType] = signature
+	sm.signatures[sysType] = sig
 }
 
 func (sm *SystemManager) EntityDestroyed(entity Entity) {
@@ -50,14 +52,15 @@ func (sm *SystemManager) EntityDestroyed(entity Entity) {
 	}
 }
 
-func (sm *SystemManager) EntitySignatureChanged(entity Entity, entitySignature Signature) {
+// TODO: This could be done with events.
+func (sm *SystemManager) EntitySignatureChanged(entity Entity, sig Signature) {
 	for sysType, sys := range sm.systems {
 		systemSignature := sm.signatures[sysType]
 
-		if (uint(entitySignature) & uint(systemSignature)) == uint(systemSignature) {
-			sys.AddEntity(entity)
-		} else {
+		if systemSignature.Intersection(sig).Count() == 0 {
 			sys.EntityDestroyed(entity)
+		} else {
+			sys.AddEntity(entity)
 		}
 	}
 }

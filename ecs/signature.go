@@ -1,18 +1,14 @@
 package ecs
 
-// Signature represents a bitset of component types.
-type Signature uint64
+import "github.com/bits-and-blooms/bitset"
 
-// NewSignature creates a new signature.
-func NewSignature(componentTypes ...ComponentType) Signature {
-	var signature Signature
-	for _, componentType := range componentTypes {
-		signature.Set(componentType)
+type Signature = *bitset.BitSet
+
+func NewSignature(components ...ComponentType) Signature {
+	signature := bitset.New(MaxComponents)
+	for _, component := range components {
+		signature.Set(uint(component))
 	}
-	return signature
-}
 
-// Set adds a component type to the signature.
-func (s *Signature) Set(componentType ComponentType) {
-	*s |= 1 << componentType
+	return signature
 }

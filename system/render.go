@@ -37,6 +37,7 @@ func (s *RenderSystem) Update() error {
 }
 
 func (s *RenderSystem) Draw(screen *ebiten.Image) {
+	println("RenderSystem.Draw")
 	for _, entity := range s.entities {
 		t, err := s.componentManager.GetComponent(entity, ecs.ComponentType(components.TransformComponentType))
 		if err != nil {

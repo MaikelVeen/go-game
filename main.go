@@ -3,6 +3,7 @@ package main
 import (
 	"log/slog"
 
+	"github.com/MaikelVeen/go-game/ecs"
 	"github.com/MaikelVeen/go-game/game"
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -16,7 +17,15 @@ func main() {
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	ebiten.SetWindowTitle("Hello, World!")
 
-	if err := ebiten.RunGame(game.New().Init()); err != nil {
+	coordinator := ecs.NewCoordinator(
+		ecs.NewEntityManager(),
+		ecs.NewComponentManager(),
+		ecs.NewSystemManager(),
+	)
+
+	game := game.New(coordinator)
+
+	if err := ebiten.RunGame(game); err != nil {
 		slog.Error(err.Error())
 	}
 }
