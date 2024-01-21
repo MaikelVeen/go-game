@@ -24,9 +24,7 @@ type RenderSystem struct {
 	scaleFactor float64
 }
 
-// There is a bug here if a system depends on multiple
 func (s *RenderSystem) AddEntity(entity ecs.Entity) {
-	// Check if exists.
 	if _, exists := s.entities[entity]; exists {
 		return
 	}

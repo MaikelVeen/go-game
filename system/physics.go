@@ -26,7 +26,6 @@ func NewPhysicsSystem(cm *ecs.ComponentManager) *PhysicsSystem {
 }
 
 func (s *PhysicsSystem) AddEntity(entity ecs.Entity) {
-	// Check if exists.
 	if _, exists := s.entities[entity]; exists {
 		return
 	}

@@ -24,7 +24,6 @@ type InputSystem struct {
 }
 
 func (s *InputSystem) AddEntity(entity ecs.Entity) {
-	// Check if exists.
 	if _, exists := s.entities[entity]; exists {
 		return
 	}
