@@ -8,7 +8,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-const RenderSystemType ecs.SystemType = 0
+const RenderSystemType ecs.SystemType = 2
 
 var _ ecs.System = &RenderSystem{}
 

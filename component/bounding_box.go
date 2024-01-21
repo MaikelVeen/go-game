@@ -5,8 +5,8 @@ import (
 )
 
 const (
-	BoundingBoxComponentName       = "boundingBox"
-	BoundingBoxComponentType uint8 = 3
+	BoxColliderComponentName       = "boxCollider"
+	BoxColliderComponentType uint8 = 3
 )
 
 var _ Component = (*BoundingBox)(nil)

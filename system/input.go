@@ -12,7 +12,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/text"
 )
 
-const InputSystemType ecs.SystemType = 1
+const InputSystemType ecs.SystemType = 0
 
 var _ ecs.System = &InputSystem{}
 
@@ -44,11 +44,7 @@ func NewInputSystem(cm *ecs.ComponentManager) *InputSystem {
 	}
 }
 
-func (s *InputSystem) Update() error {
-	s.keys = inpututil.AppendPressedKeys(s.keys[:0])
-	return nil
-}
-
+// Draw implements ecs.System.
 func (s *InputSystem) Draw(screen *ebiten.Image) {
 	var keyStrs []string
 	var keyNames []string
@@ -67,4 +63,10 @@ func (s *InputSystem) Draw(screen *ebiten.Image) {
 		40,
 		color.White,
 	)
+}
+
+// Update implements ecs.System.
+func (s *InputSystem) Update() error {
+	s.keys = inpututil.AppendPressedKeys(s.keys[:0])
+	return nil
 }

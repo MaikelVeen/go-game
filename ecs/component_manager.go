@@ -17,6 +17,8 @@ func NewComponentManager() *ComponentManager {
 			0: NewComponentStore[any](), // Transform
 			1: NewComponentStore[any](), // SpriteRender
 			2: NewComponentStore[any](), // PlayerController
+			3: NewComponentStore[any](), // BoxCollider
+			4: NewComponentStore[any](), // Rigidbody
 		},
 	}
 }

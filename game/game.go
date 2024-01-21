@@ -43,6 +43,22 @@ func New(config *data.GameConfig, coordinator *ecs.Coordinator) *Game {
 func (g *Game) registerSystems() error {
 	defer timer.Timer("registerSystems")()
 
+	// Register InputSystem.
+	inputSystem := system.NewInputSystem(
+		g.coordinator.ComponentManager,
+	)
+	g.coordinator.RegisterSystem(system.InputSystemType, inputSystem)
+	g.coordinator.SetSystemSignature(system.InputSystemType, ecs.NewSignature(
+		ecs.ComponentType(component.PlayerControllerType),
+	))
+
+	// Register PhysicsSystem.
+	physicsSystem := system.NewPhysicsSystem(
+		g.coordinator.ComponentManager,
+	)
+	g.coordinator.RegisterSystem(system.PhysicsSystemType, physicsSystem)
+	g.coordinator.SetSystemSignature(system.PhysicsSystemType, ecs.NewSignature())
+
 	// Register RenderSystem.
 	renderSystem := system.NewRenderSystem(
 		g.coordinator.ComponentManager,
@@ -50,25 +66,10 @@ func (g *Game) registerSystems() error {
 		4,
 	)
 	g.coordinator.RegisterSystem(system.RenderSystemType, renderSystem)
-
-	// Set signature for RenderSystem.
-	signature := ecs.NewSignature(
+	g.coordinator.SetSystemSignature(system.RenderSystemType, ecs.NewSignature(
 		ecs.ComponentType(component.TransformComponentType),
 		ecs.ComponentType(component.SpriteRenderComponentType),
-	)
-	g.coordinator.SetSystemSignature(system.RenderSystemType, signature)
-
-	// Register InputSystem.
-	inputSystem := system.NewInputSystem(
-		g.coordinator.ComponentManager,
-	)
-	g.coordinator.RegisterSystem(system.InputSystemType, inputSystem)
-
-	// Set signature for InputSystem.
-	signature = ecs.NewSignature(
-		ecs.ComponentType(component.PlayerControllerType),
-	)
-	g.coordinator.SetSystemSignature(system.InputSystemType, signature)
+	))
 
 	return nil
 }
