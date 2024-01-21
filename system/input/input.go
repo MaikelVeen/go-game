@@ -22,6 +22,7 @@ type InputSystem struct {
 	currentDirection *types.Vector2
 }
 
+// New returns a new InputSystem.
 func New(cm *ecs.ComponentManager) *InputSystem {
 	return &InputSystem{
 		componentManager: cm,
@@ -57,6 +58,10 @@ func (s *InputSystem) Draw(screen *ebiten.Image) {
 }
 
 // Update implements ecs.System.
+//
+// Each iteration of the game loop, relevant player controllers
+// are updated with the current input direction and the rigidbody
+// is updated with the new velocity.
 func (s *InputSystem) Update() error {
 	s.currentDirection = s.Direction()
 	for entity := range s.entities {
@@ -67,8 +72,14 @@ func (s *InputSystem) Update() error {
 		}
 		playerController := pc.(*component.PlayerController)
 
-		// Update the player controller.
-		return playerController.Update(s.currentDirection)
+		_ = playerController.Speed
+
+		// Get the rigidbody component.
+		rb, err := s.componentManager.GetComponent(entity, ecs.ComponentType(component.RigidbodyComponentType))
+		if err != nil {
+			return err
+		}
+		_ = rb.(*component.Rigidbody)
 	}
 
 	return nil

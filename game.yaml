@@ -13,5 +13,5 @@ entities:
       - type: playerController
         data:
           speed: 2.0
-
+      - type: rigidbody
       

@@ -2,8 +2,6 @@ package component
 
 import (
 	"fmt"
-
-	"github.com/MaikelVeen/go-game/types"
 )
 
 const PlayerControllerComponentName = "playerController"
@@ -12,13 +10,7 @@ const PlayerControllerType uint8 = 2
 var _ Component = (*PlayerController)(nil)
 
 type PlayerController struct {
-	Speed     float64
-	Direction *types.Vector2
-}
-
-func (pc *PlayerController) Update(Direction *types.Vector2) error {
-	pc.Direction = Direction
-	return nil
+	Speed float64
 }
 
 // SetData implements Component.

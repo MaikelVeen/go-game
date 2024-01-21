@@ -1,6 +1,8 @@
 module github.com/MaikelVeen/go-game
 
-go 1.21.3
+go 1.21.5
+
+toolchain go1.21.6
 
 require (
 	github.com/bits-and-blooms/bitset v1.13.0
@@ -13,6 +15,7 @@ require (
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/ebitengine/purego v0.5.0 // indirect
+	github.com/jakecoffman/cp/v2 v2.0.1 // indirect
 	github.com/jezek/xgb v1.1.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	golang.org/x/exp/shiny v0.0.0-20230817173708-d852ddb80c63 // indirect

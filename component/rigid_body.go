@@ -17,3 +17,7 @@ type Rigidbody struct {
 func (*Rigidbody) SetData(data map[string]any) error {
 	return nil // Noop.
 }
+
+func (r *Rigidbody) AddForce(force *types.Vector2) {
+	r.Velocity.Add(force)
+}
