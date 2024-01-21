@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 
+	"github.com/MaikelVeen/go-game/component"
 	"github.com/MaikelVeen/go-game/ecs"
 	"github.com/MaikelVeen/go-game/types"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -58,6 +59,18 @@ func (s *InputSystem) Draw(screen *ebiten.Image) {
 // Update implements ecs.System.
 func (s *InputSystem) Update() error {
 	s.currentDirection = s.Direction()
+	for entity := range s.entities {
+		// Get the player controller component.
+		pc, err := s.componentManager.GetComponent(entity, ecs.ComponentType(component.PlayerControllerType))
+		if err != nil {
+			return err
+		}
+		playerController := pc.(*component.PlayerController)
+
+		// Update the player controller.
+		return playerController.Update(s.currentDirection)
+	}
+
 	return nil
 }
 
