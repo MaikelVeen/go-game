@@ -21,6 +21,19 @@ func NewCoordinator(
 	}
 }
 
+func (c *Coordinator) Update() error {
+	return c.SystemManager.ForEachSystem(func(sys System) error {
+		return sys.Update()
+	})
+}
+
+func (c *Coordinator) Draw(screen *ebiten.Image) {
+	_ = c.SystemManager.ForEachSystem(func(sys System) error {
+		sys.Draw(screen)
+		return nil
+	})
+}
+
 func (c *Coordinator) CreateEntity() (Entity, error) {
 	return c.EntityManager.Create()
 }
@@ -65,26 +78,14 @@ func (c *Coordinator) RemoveComponent(entity Entity, componentType ComponentType
 	return nil
 }
 
-func (c *Coordinator) RegisterSystem(sys System) {
-	c.SystemManager.RegisterSystem(sys)
+// RegisterSystem registers a system with the SystemManager.
+// Returns an error if the system is already registered.
+func (c *Coordinator) RegisterSystem(sysType SystemType, sys System) error {
+	return c.SystemManager.RegisterSystem(sysType, sys)
 }
 
-func (c *Coordinator) SetSystemSignature(sys System, sig Signature) {
-	c.SystemManager.SetSignature(sys, sig)
-}
-
-func (c *Coordinator) Update() error {
-	for _, sys := range c.SystemManager.Systems() {
-		if err := sys.Update(); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (c *Coordinator) Draw(screen *ebiten.Image) {
-	for _, sys := range c.SystemManager.Systems() {
-		sys.Draw(screen)
-	}
+// SetSignature sets the signature for a system, this indicates which set of components
+// the system is interested in.
+func (c *Coordinator) SetSystemSignature(sysType SystemType, sig Signature) error {
+	return c.SystemManager.SetSignature(sysType, sig)
 }

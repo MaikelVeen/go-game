@@ -39,14 +39,14 @@ func New(coordinator *ecs.Coordinator) *Game {
 func (g *Game) registerSystems() error {
 	// Register RenderSystem.
 	renderSystem := system.NewRenderSystem(g.coordinator.ComponentManager)
-	g.coordinator.RegisterSystem(renderSystem)
+	g.coordinator.RegisterSystem(system.RenderSystemType, renderSystem)
 
 	// Set signature for RenderSystem.
 	signature := ecs.NewSignature(
 		ecs.ComponentType(components.TransformComponentType),
 		ecs.ComponentType(components.SpriteRenderComponentType),
 	)
-	g.coordinator.SetSystemSignature(renderSystem, signature)
+	g.coordinator.SetSystemSignature(system.RenderSystemType, signature)
 
 	return nil
 }

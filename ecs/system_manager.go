@@ -1,66 +1,78 @@
 package ecs
 
 import (
-	"reflect"
+	"errors"
 )
 
-// TODO: Get Rid of the reflect package.
+var (
+	ErrSystemAlreadyRegistered = errors.New("System already registered")
+	ErrSystemNotRegistered     = errors.New("System not registered")
+)
 
 // SystemManager manages systems and their signatures
 type SystemManager struct {
-	systems    map[reflect.Type]System
-	signatures map[reflect.Type]Signature
+	systems    map[SystemType]System
+	signatures map[SystemType]Signature
 }
 
 func NewSystemManager() *SystemManager {
 	return &SystemManager{
-		systems:    make(map[reflect.Type]System),
-		signatures: make(map[reflect.Type]Signature),
+		systems:    make(map[SystemType]System),
+		signatures: make(map[SystemType]Signature),
 	}
 }
 
-func (sm *SystemManager) Systems() []System {
-	systems := make([]System, 0)
+// ForEachSystem iterates over all systems and calls the provided function.
+// If the function returns an error, the iteration is stopped and the error is returned.
+func (sm *SystemManager) ForEachSystem(fn func(System) error) error {
 	for _, sys := range sm.systems {
-		systems = append(systems, sys)
+		if err := fn(sys); err != nil {
+			return err
+			// TODO: Think about the notion of recoverabla errors and
+			// which class should be responsible for handling them.
+		}
 	}
-
-	return systems
+	return nil
 }
 
-func (sm *SystemManager) RegisterSystem(sys System) {
-	sysType := reflect.TypeOf(sys)
+// RegisterSystem registers a system with the SystemManager.
+// Returns an error if the system is already registered.
+func (sm *SystemManager) RegisterSystem(sysType SystemType, sys System) error {
 	if _, exists := sm.systems[sysType]; exists {
-		panic("Registering system more than once")
+		return ErrSystemAlreadyRegistered
 	}
 
 	sm.systems[sysType] = sys
+	return nil
 }
 
-func (sm *SystemManager) SetSignature(sys System, sig Signature) {
-	sysType := reflect.TypeOf(sys)
+// SetSignature sets the signature for a system, this indicates which set of components
+// the system is interested in.
+func (sm *SystemManager) SetSignature(sysType SystemType, sig Signature) error {
 	if _, exists := sm.systems[sysType]; !exists {
-		panic("System used before registered")
+		return ErrSystemNotRegistered
 	}
 
 	sm.signatures[sysType] = sig
+	return nil
 }
 
+// EntityDestroyed notifies all systems that an entity has been destroyed.
 func (sm *SystemManager) EntityDestroyed(entity Entity) {
 	for _, sys := range sm.systems {
 		sys.EntityDestroyed(entity)
 	}
 }
 
-// TODO: This could be done with events.
+// EntitySignatureChanged notifies all systems that an entity's signature has changed.
 func (sm *SystemManager) EntitySignatureChanged(entity Entity, sig Signature) {
 	for sysType, sys := range sm.systems {
 		systemSignature := sm.signatures[sysType]
 
-		if systemSignature.Intersection(sig).Count() == 0 {
-			sys.EntityDestroyed(entity)
-		} else {
+		if sig.Equal(systemSignature) {
 			sys.AddEntity(entity)
+		} else {
+			sys.EntityDestroyed(entity)
 		}
 	}
 }

@@ -6,24 +6,22 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+const RenderSystemType ecs.SystemType = 1
+
 var _ ecs.System = &RenderSystem{}
 
 type RenderSystem struct {
 	componentManager *ecs.ComponentManager
-	entities         []ecs.Entity
+	entities         map[ecs.Entity]struct{}
 }
 
+// There is a bug here if a system depends on multiple
 func (s *RenderSystem) AddEntity(entity ecs.Entity) {
-	s.entities = append(s.entities, entity)
+	s.entities[entity] = struct{}{}
 }
 
 func (s *RenderSystem) EntityDestroyed(entity ecs.Entity) {
-	for i, e := range s.entities {
-		if e == entity {
-			s.entities = append(s.entities[:i], s.entities[i+1:]...)
-			break
-		}
-	}
+	delete(s.entities, entity)
 }
 
 func NewRenderSystem(cm *ecs.ComponentManager) *RenderSystem {
@@ -38,7 +36,7 @@ func (s *RenderSystem) Update() error {
 
 func (s *RenderSystem) Draw(screen *ebiten.Image) {
 	println("RenderSystem.Draw")
-	for _, entity := range s.entities {
+	for entity := range s.entities {
 		t, err := s.componentManager.GetComponent(entity, ecs.ComponentType(components.TransformComponentType))
 		if err != nil {
 			// TODO : Log an error here.
