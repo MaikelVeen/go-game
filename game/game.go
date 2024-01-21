@@ -13,6 +13,7 @@ import (
 	"github.com/MaikelVeen/go-game/timer"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/jakecoffman/cp/v2"
 )
 
 var _ ebiten.Game = &Game{}
@@ -57,7 +58,7 @@ func (g *Game) registerSystems() error {
 	// Register PhysicsSystem.
 	if err := g.registerSystem(
 		physics.SystemType,
-		physics.New(g.coordinator.ComponentManager),
+		physics.New(g.coordinator.ComponentManager, cp.NewSpace()),
 		ecs.NewSignature(),
 	); err != nil {
 		return err

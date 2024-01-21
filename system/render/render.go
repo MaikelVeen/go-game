@@ -38,6 +38,11 @@ func New(
 	}
 }
 
+// Init implements ecs.System.
+func (s *RenderSystem) Init() error {
+	return nil
+}
+
 func (s *RenderSystem) AddEntity(entity ecs.Entity) {
 	if _, exists := s.entities[entity]; exists {
 		return

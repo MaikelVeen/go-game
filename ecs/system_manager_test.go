@@ -55,6 +55,7 @@ func (ms *MockSystem) EntityDestroyed(entity Entity) {
 	delete(ms.entities, entity)
 }
 
+func (ms *MockSystem) Init() error        { return nil }
 func (ms *MockSystem) Update() error      { return nil }
 func (ms *MockSystem) Draw(*ebiten.Image) {}
 

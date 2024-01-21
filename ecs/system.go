@@ -10,6 +10,7 @@ type System interface {
 	AddEntity(entity Entity)
 	EntityDestroyed(entity Entity)
 
+	Init() error
 	Update() error
 	Draw(screen *ebiten.Image)
 }

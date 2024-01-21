@@ -44,6 +44,10 @@ func (s *InputSystem) EntityDestroyed(entity ecs.Entity) {
 	delete(s.entities, entity)
 }
 
+func (s *InputSystem) Init() error {
+	return nil
+}
+
 // Draw implements ecs.System.
 func (s *InputSystem) Draw(screen *ebiten.Image) {
 	ebitenutil.DebugPrintAt(
