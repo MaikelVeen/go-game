@@ -3,11 +3,12 @@ entities:
     components:
       - type: transform
         data:
-          x: 100
-          y: 100
+          x: 100.0
+          y: 150.0
       - type: spriteRender
         data:
           spriteSheet: playerSpriteSheet
           x: 1
           y: 0
       - type: playerController
+      

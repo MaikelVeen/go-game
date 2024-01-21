@@ -87,8 +87,8 @@ func drawEntity(s *RenderSystem, entity ecs.Entity) {
 
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(
-		float64(tranform.X),
-		float64(tranform.Y),
+		tranform.Vector.X,
+		tranform.Vector.Y,
 	)
 
 	s.offScreenImage.DrawImage(sr.GetSprite(), op)

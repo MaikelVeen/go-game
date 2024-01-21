@@ -24,40 +24,28 @@ func TestTransform_SetData(t *testing.T) {
 	}{
 		{
 			name: "should set X and Y correctly",
-			fields: fields{
-				X: 0,
-				Y: 0,
-			},
 			args: args{
 				data: map[string]interface{}{
-					"x": 10,
-					"y": 20,
+					"x": 10.0,
+					"y": 20.0,
 				},
 			},
 			wantErr: false,
 		},
 		{
 			name: "should return error when X is missing",
-			fields: fields{
-				X: 0,
-				Y: 0,
-			},
 			args: args{
 				data: map[string]interface{}{
-					"y": 20,
+					"y": 20.0,
 				},
 			},
 			wantErr: true,
 		},
 		{
 			name: "should return error when Y is missing",
-			fields: fields{
-				X: 0,
-				Y: 0,
-			},
 			args: args{
 				data: map[string]interface{}{
-					"x": 10,
+					"x": 10.0,
 				},
 			},
 			wantErr: true,
@@ -69,18 +57,14 @@ func TestTransform_SetData(t *testing.T) {
 
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-
-			tr := &Transform{
-				X: tt.fields.X,
-				Y: tt.fields.Y,
-			}
+			tr := &Transform{}
 			err := tr.SetData(tt.args.data)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
-				assert.Equal(t, tt.args.data["x"], tr.X)
-				assert.Equal(t, tt.args.data["y"], tr.Y)
+				assert.Equal(t, tt.args.data["x"], float64(tr.Vector.X))
+				assert.Equal(t, tt.args.data["y"], float64(tr.Vector.Y))
 			}
 		})
 	}

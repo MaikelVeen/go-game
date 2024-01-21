@@ -1,31 +1,38 @@
 package component
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/MaikelVeen/go-game/types"
+)
 
 const TransformComponentType uint8 = 0
 
 var _ Component = (*Transform)(nil)
 
 type Transform struct {
-	X, Y int
+	Vector *types.Vector2
 }
 
 func (t *Transform) SetData(data map[string]any) error {
+	vec := &types.Vector2{}
+
 	x, ok := data["x"]
 	if !ok {
 		return fmt.Errorf("could not set transform data: missing x")
 	}
-	if x, ok := x.(int); ok {
-		t.X = x
+	if x, ok := x.(float64); ok {
+		vec.X = float64(x)
 	}
 
 	y, ok := data["y"]
 	if !ok {
 		return fmt.Errorf("could not set transform data: missing y")
 	}
-	if y, ok := y.(int); ok {
-		t.Y = y
+	if y, ok := y.(float64); ok {
+		vec.Y = float64(y)
 	}
 
+	t.Vector = vec
 	return nil
 }
