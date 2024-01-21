@@ -6,7 +6,10 @@ import (
 	"github.com/MaikelVeen/go-game/types"
 )
 
-const TransformComponentType uint8 = 0
+const (
+	TransformComponentName       = "transform"
+	TransformComponentType uint8 = 0
+)
 
 var _ Component = (*Transform)(nil)
 

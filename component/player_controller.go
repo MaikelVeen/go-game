@@ -1,5 +1,6 @@
 package component
 
+const PlayerControllerComponentName = "playerController"
 const PlayerControllerType uint8 = 2
 
 var _ Component = (*PlayerController)(nil)

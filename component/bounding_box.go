@@ -4,7 +4,10 @@ import (
 	"github.com/MaikelVeen/go-game/types"
 )
 
-const BoundingBoxComponentType uint8 = 3
+const (
+	BoundingBoxComponentName       = "boundingBox"
+	BoundingBoxComponentType uint8 = 3
+)
 
 var _ Component = (*BoundingBox)(nil)
 

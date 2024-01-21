@@ -7,7 +7,10 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-const SpriteRenderComponentType uint8 = 1
+const (
+	SpriteRenderComponentName       = "spriteRender"
+	SpriteRenderComponentType uint8 = 1
+)
 
 var _ Component = (*SpriteRender)(nil)
 
