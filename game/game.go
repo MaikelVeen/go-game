@@ -9,6 +9,7 @@ import (
 	"github.com/MaikelVeen/go-game/data"
 	"github.com/MaikelVeen/go-game/ecs"
 	"github.com/MaikelVeen/go-game/system"
+	"github.com/MaikelVeen/go-game/timer"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
@@ -20,11 +21,7 @@ type Game struct {
 	coordinator *ecs.Coordinator
 }
 
-// TODO: Inject Logger.
-func New(
-	config *data.GameConfig,
-	coordinator *ecs.Coordinator,
-) *Game {
+func New(config *data.GameConfig, coordinator *ecs.Coordinator) *Game {
 	g := &Game{
 		config:      config,
 		coordinator: coordinator,
@@ -44,6 +41,8 @@ func New(
 }
 
 func (g *Game) registerSystems() error {
+	defer timer.Timer("registerSystems")()
+
 	// Register RenderSystem.
 	renderSystem := system.NewRenderSystem(
 		g.coordinator.ComponentManager,
@@ -75,6 +74,8 @@ func (g *Game) registerSystems() error {
 }
 
 func (g *Game) createEntities() error {
+	defer timer.Timer("createEntities")()
+
 	// Create entities.
 	for _, entityConfig := range g.config.Entities {
 		entity, err := g.coordinator.CreateEntity()

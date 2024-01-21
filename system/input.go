@@ -2,6 +2,7 @@ package system
 
 import (
 	"image/color"
+	"log/slog"
 	"strings"
 
 	"github.com/MaikelVeen/go-game/ecs"
@@ -23,7 +24,13 @@ type InputSystem struct {
 }
 
 func (s *InputSystem) AddEntity(entity ecs.Entity) {
+	// Check if exists.
+	if _, exists := s.entities[entity]; exists {
+		return
+	}
+
 	s.entities[entity] = struct{}{}
+	slog.Debug("Added entity to InputSystem", "entity", entity)
 }
 
 func (s *InputSystem) EntityDestroyed(entity ecs.Entity) {

@@ -12,7 +12,6 @@ type ComponentManager struct {
 
 // NewComponentManager creates a new component registry.
 func NewComponentManager() *ComponentManager {
-	// TODO: Add back type registry instead of hardcoding here.
 	return &ComponentManager{
 		componentStores: map[ComponentType]*ComponentStore[any]{
 			0: NewComponentStore[any](), // Transform

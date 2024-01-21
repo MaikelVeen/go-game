@@ -6,6 +6,7 @@ require (
 	github.com/bits-and-blooms/bitset v1.13.0
 	github.com/hajimehoshi/bitmapfont/v3 v3.0.0
 	github.com/hajimehoshi/ebiten/v2 v2.6.3
+	github.com/lmittmann/tint v1.0.4
 	github.com/stretchr/testify v1.8.4
 	gopkg.in/yaml.v3 v3.0.1
 )

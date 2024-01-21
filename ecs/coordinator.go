@@ -1,6 +1,10 @@
 package ecs
 
-import "github.com/hajimehoshi/ebiten/v2"
+import (
+	"log/slog"
+
+	"github.com/hajimehoshi/ebiten/v2"
+)
 
 // Coordinator is the main coordinator for the entity-component-system (ECS) architecture.
 type Coordinator struct {
@@ -35,14 +39,25 @@ func (c *Coordinator) Draw(screen *ebiten.Image) {
 }
 
 func (c *Coordinator) CreateEntity() (Entity, error) {
-	return c.EntityManager.Create()
+	e, err := c.EntityManager.Create()
+	slog.Debug("Creating entity", "entity", e)
+	return e, err
 }
 
 func (c *Coordinator) DestroyEntity(entity Entity) error {
-	return c.EntityManager.Destroy(entity)
+	slog.Debug("Destroying entity", "entity", entity)
+	if err := c.EntityManager.Destroy(entity); err != nil {
+		return err
+	}
+
+	c.ComponentManager.EntityDestroyed(entity)
+	c.SystemManager.EntityDestroyed(entity)
+	return nil
 }
 
 func (c *Coordinator) AddComponent(entity Entity, componentType ComponentType, component any) error {
+	slog.Debug("Adding component", "entity", entity, "componentType", componentType)
+
 	if err := c.ComponentManager.AddComponent(entity, componentType, component); err != nil {
 		return err
 	}
@@ -61,6 +76,8 @@ func (c *Coordinator) AddComponent(entity Entity, componentType ComponentType, c
 }
 
 func (c *Coordinator) RemoveComponent(entity Entity, componentType ComponentType) error {
+	slog.Debug("Removing component", "entity", entity, "componentType", componentType)
+
 	if err := c.ComponentManager.RemoveComponent(entity, componentType); err != nil {
 		return err
 	}
@@ -81,11 +98,13 @@ func (c *Coordinator) RemoveComponent(entity Entity, componentType ComponentType
 // RegisterSystem registers a system with the SystemManager.
 // Returns an error if the system is already registered.
 func (c *Coordinator) RegisterSystem(sysType SystemType, sys System) error {
+	slog.Debug("Registering system", "systemType", sysType)
 	return c.SystemManager.RegisterSystem(sysType, sys)
 }
 
 // SetSignature sets the signature for a system, this indicates which set of components
 // the system is interested in.
 func (c *Coordinator) SetSystemSignature(sysType SystemType, sig Signature) error {
+	slog.Debug("Setting system signature", "systemType", sysType, "signature", sig)
 	return c.SystemManager.SetSignature(sysType, sig)
 }

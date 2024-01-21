@@ -1,6 +1,8 @@
 package system
 
 import (
+	"log/slog"
+
 	"github.com/MaikelVeen/go-game/component"
 	"github.com/MaikelVeen/go-game/ecs"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -24,7 +26,13 @@ type RenderSystem struct {
 
 // There is a bug here if a system depends on multiple
 func (s *RenderSystem) AddEntity(entity ecs.Entity) {
+	// Check if exists.
+	if _, exists := s.entities[entity]; exists {
+		return
+	}
+
 	s.entities[entity] = struct{}{}
+	slog.Debug("Added entity to RenderSystem", "entity", entity)
 }
 
 func (s *RenderSystem) EntityDestroyed(entity ecs.Entity) {
@@ -52,32 +60,36 @@ func (s *RenderSystem) Draw(screen *ebiten.Image) {
 	s.offScreenImage.Clear()
 
 	for entity := range s.entities {
-		t, err := s.componentManager.GetComponent(entity, ecs.ComponentType(component.TransformComponentType))
-		if err != nil {
-			// TODO : Log an error here.
-			panic(err)
-		}
-		tranform := t.(*component.Transform)
-
-		spriteRender, err := s.componentManager.GetComponent(entity, ecs.ComponentType(component.SpriteRenderComponentType))
-		if err != nil {
-			// TODO : Log an error here.
-			panic(err)
-		}
-		sr := spriteRender.(*component.SpriteRender)
-
-		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(
-			float64(tranform.X),
-			float64(tranform.Y),
-		)
-
-		s.offScreenImage.DrawImage(sr.GetSprite(), op)
+		drawEntity(s, entity)
 	}
 
 	// Scale the offscreen image.
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(float64(s.scaleFactor), float64(s.scaleFactor))
+	op.GeoM.Scale(s.scaleFactor, s.scaleFactor)
 
 	screen.DrawImage(s.offScreenImage, op)
+}
+
+func drawEntity(s *RenderSystem, entity ecs.Entity) {
+	t, err := s.componentManager.GetComponent(entity, ecs.ComponentType(component.TransformComponentType))
+	if err != nil {
+		slog.Error("Failed to get Transform component", "entity", entity)
+		return
+	}
+	tranform := t.(*component.Transform)
+
+	spriteRender, err := s.componentManager.GetComponent(entity, ecs.ComponentType(component.SpriteRenderComponentType))
+	if err != nil {
+		slog.Error(err.Error())
+		return
+	}
+	sr := spriteRender.(*component.SpriteRender)
+
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(
+		float64(tranform.X),
+		float64(tranform.Y),
+	)
+
+	s.offScreenImage.DrawImage(sr.GetSprite(), op)
 }
