@@ -52,7 +52,12 @@ func main() {
 		return
 	}
 
-	game := game.New(gameConfig, coordinator)
+	game, err := game.New(gameConfig, coordinator)
+	if err != nil {
+		slog.Error("Could not create game", "error", err)
+		return
+	}
+
 	if err := ebiten.RunGame(game); err != nil {
 		slog.Error(err.Error())
 	}

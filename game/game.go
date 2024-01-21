@@ -2,7 +2,6 @@ package game
 
 import (
 	"fmt"
-	"log/slog"
 	"reflect"
 
 	"github.com/MaikelVeen/go-game/component"
@@ -21,56 +20,74 @@ type Game struct {
 	coordinator *ecs.Coordinator
 }
 
-func New(config *data.GameConfig, coordinator *ecs.Coordinator) *Game {
+// New returns a new Game.
+func New(config *data.GameConfig, coordinator *ecs.Coordinator) (*Game, error) {
 	g := &Game{
 		config:      config,
 		coordinator: coordinator,
 	}
 
 	if err := g.registerSystems(); err != nil {
-		slog.Error(err.Error())
-		panic(err)
+		return nil, err
 	}
 
 	if err := g.createEntities(); err != nil {
-		slog.Error(err.Error())
-		panic(err)
+		return nil, err
 	}
 
-	return g
+	return g, nil
 }
 
 func (g *Game) registerSystems() error {
 	defer timer.Timer("registerSystems")()
 
 	// Register InputSystem.
-	inputSystem := system.NewInputSystem(
-		g.coordinator.ComponentManager,
-	)
-	g.coordinator.RegisterSystem(system.InputSystemType, inputSystem)
-	g.coordinator.SetSystemSignature(system.InputSystemType, ecs.NewSignature(
-		ecs.ComponentType(component.PlayerControllerType),
-	))
+	if err := g.registerSystem(
+		system.InputSystemType,
+		system.NewInputSystem(g.coordinator.ComponentManager),
+		ecs.NewSignature(
+			ecs.ComponentType(component.PlayerControllerType),
+		),
+	); err != nil {
+		return err
+	}
 
 	// Register PhysicsSystem.
-	physicsSystem := system.NewPhysicsSystem(
-		g.coordinator.ComponentManager,
-	)
-	g.coordinator.RegisterSystem(system.PhysicsSystemType, physicsSystem)
-	g.coordinator.SetSystemSignature(system.PhysicsSystemType, ecs.NewSignature())
+	if err := g.registerSystem(
+		system.PhysicsSystemType,
+		system.NewPhysicsSystem(g.coordinator.ComponentManager),
+		ecs.NewSignature(),
+	); err != nil {
+		return err
+	}
 
 	// Register RenderSystem.
-	renderSystem := system.NewRenderSystem(
-		g.coordinator.ComponentManager,
-		ebiten.NewImage(320, 240),
-		4,
-	)
-	g.coordinator.RegisterSystem(system.RenderSystemType, renderSystem)
-	g.coordinator.SetSystemSignature(system.RenderSystemType, ecs.NewSignature(
-		ecs.ComponentType(component.TransformComponentType),
-		ecs.ComponentType(component.SpriteRenderComponentType),
-	))
+	if err := g.registerSystem(
+		system.RenderSystemType,
+		system.NewRenderSystem(
+			g.coordinator.ComponentManager,
+			ebiten.NewImage(320, 240),
+			4,
+		),
+		ecs.NewSignature(
+			ecs.ComponentType(component.TransformComponentType),
+			ecs.ComponentType(component.SpriteRenderComponentType),
+		),
+	); err != nil {
+		return err
+	}
 
+	return nil
+}
+
+// registerSystem registers a system and sets its signature.
+func (g *Game) registerSystem(sysType ecs.SystemType, sys ecs.System, sig ecs.Signature) error {
+	if err := g.coordinator.RegisterSystem(sysType, sys); err != nil {
+		return fmt.Errorf("failed to register system: %w", err)
+	}
+	if err := g.coordinator.SetSystemSignature(sysType, sig); err != nil {
+		return fmt.Errorf("failed to set system signature: %w", err)
+	}
 	return nil
 }
 

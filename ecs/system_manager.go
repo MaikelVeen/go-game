@@ -5,8 +5,8 @@ import (
 )
 
 var (
-	ErrSystemAlreadyRegistered = errors.New("System already registered")
-	ErrSystemNotRegistered     = errors.New("System not registered")
+	ErrSystemAlreadyRegistered = errors.New("cannot register system, SystemType already registered")
+	ErrSystemNotRegistered     = errors.New("system not registered")
 )
 
 // SystemManager manages systems and their signatures
