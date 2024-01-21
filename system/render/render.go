@@ -1,4 +1,4 @@
-package system
+package render
 
 import (
 	"log/slog"
@@ -8,7 +8,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-const RenderSystemType ecs.SystemType = 2
+const SystemType ecs.SystemType = 2
 
 var _ ecs.System = &RenderSystem{}
 
@@ -24,6 +24,20 @@ type RenderSystem struct {
 	scaleFactor float64
 }
 
+// New returns a new RenderSystem.
+func New(
+	cm *ecs.ComponentManager,
+	offScreenImage *ebiten.Image,
+	scale float64,
+) *RenderSystem {
+	return &RenderSystem{
+		componentManager: cm,
+		entities:         make(map[ecs.Entity]struct{}),
+		offScreenImage:   offScreenImage,
+		scaleFactor:      scale,
+	}
+}
+
 func (s *RenderSystem) AddEntity(entity ecs.Entity) {
 	if _, exists := s.entities[entity]; exists {
 		return
@@ -35,19 +49,6 @@ func (s *RenderSystem) AddEntity(entity ecs.Entity) {
 
 func (s *RenderSystem) EntityDestroyed(entity ecs.Entity) {
 	delete(s.entities, entity)
-}
-
-func NewRenderSystem(
-	cm *ecs.ComponentManager,
-	offScreenImage *ebiten.Image,
-	scale float64,
-) *RenderSystem {
-	return &RenderSystem{
-		componentManager: cm,
-		entities:         make(map[ecs.Entity]struct{}),
-		offScreenImage:   offScreenImage,
-		scaleFactor:      scale,
-	}
 }
 
 func (s *RenderSystem) Update() error {

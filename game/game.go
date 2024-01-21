@@ -7,7 +7,9 @@ import (
 	"github.com/MaikelVeen/go-game/component"
 	"github.com/MaikelVeen/go-game/data"
 	"github.com/MaikelVeen/go-game/ecs"
-	"github.com/MaikelVeen/go-game/system"
+	"github.com/MaikelVeen/go-game/system/input"
+	"github.com/MaikelVeen/go-game/system/physics"
+	"github.com/MaikelVeen/go-game/system/render"
 	"github.com/MaikelVeen/go-game/timer"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -43,8 +45,8 @@ func (g *Game) registerSystems() error {
 
 	// Register InputSystem.
 	if err := g.registerSystem(
-		system.InputSystemType,
-		system.NewInputSystem(g.coordinator.ComponentManager),
+		input.SystemType,
+		input.New(g.coordinator.ComponentManager),
 		ecs.NewSignature(
 			ecs.ComponentType(component.PlayerControllerType),
 		),
@@ -54,8 +56,8 @@ func (g *Game) registerSystems() error {
 
 	// Register PhysicsSystem.
 	if err := g.registerSystem(
-		system.PhysicsSystemType,
-		system.NewPhysicsSystem(g.coordinator.ComponentManager),
+		physics.SystemType,
+		physics.New(g.coordinator.ComponentManager),
 		ecs.NewSignature(),
 	); err != nil {
 		return err
@@ -63,8 +65,8 @@ func (g *Game) registerSystems() error {
 
 	// Register RenderSystem.
 	if err := g.registerSystem(
-		system.RenderSystemType,
-		system.NewRenderSystem(
+		render.SystemType,
+		render.New(
 			g.coordinator.ComponentManager,
 			ebiten.NewImage(320, 240),
 			4,

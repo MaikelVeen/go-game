@@ -1,4 +1,4 @@
-package system
+package input
 
 import (
 	"image/color"
@@ -12,7 +12,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/text"
 )
 
-const InputSystemType ecs.SystemType = 0
+const SystemType ecs.SystemType = 0
 
 var _ ecs.System = &InputSystem{}
 
@@ -21,6 +21,13 @@ type InputSystem struct {
 	entities         map[ecs.Entity]struct{}
 
 	keys []ebiten.Key
+}
+
+func New(cm *ecs.ComponentManager) *InputSystem {
+	return &InputSystem{
+		componentManager: cm,
+		entities:         make(map[ecs.Entity]struct{}),
+	}
 }
 
 func (s *InputSystem) AddEntity(entity ecs.Entity) {
@@ -34,13 +41,6 @@ func (s *InputSystem) AddEntity(entity ecs.Entity) {
 
 func (s *InputSystem) EntityDestroyed(entity ecs.Entity) {
 	delete(s.entities, entity)
-}
-
-func NewInputSystem(cm *ecs.ComponentManager) *InputSystem {
-	return &InputSystem{
-		componentManager: cm,
-		entities:         make(map[ecs.Entity]struct{}),
-	}
 }
 
 // Draw implements ecs.System.

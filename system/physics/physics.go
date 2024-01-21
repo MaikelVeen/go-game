@@ -1,4 +1,4 @@
-package system
+package physics
 
 import (
 	"log/slog"
@@ -7,7 +7,7 @@ import (
 	ebiten "github.com/hajimehoshi/ebiten/v2"
 )
 
-const PhysicsSystemType ecs.SystemType = 1
+const SystemType ecs.SystemType = 1
 
 var _ ecs.System = &PhysicsSystem{}
 
@@ -17,8 +17,8 @@ type PhysicsSystem struct {
 	entities         map[ecs.Entity]struct{}
 }
 
-// NewPhysicsSystem returns a new PhysicsSystem.
-func NewPhysicsSystem(cm *ecs.ComponentManager) *PhysicsSystem {
+// New returns a new PhysicsSystem.
+func New(cm *ecs.ComponentManager) *PhysicsSystem {
 	return &PhysicsSystem{
 		componentManager: cm,
 		entities:         make(map[ecs.Entity]struct{}),
