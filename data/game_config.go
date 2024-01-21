@@ -20,7 +20,7 @@ type ComponentConfig struct {
 	Data map[string]any `yaml:"data"`
 }
 
-func LoadConfig(filename string) (*GameConfig, error) {
+func LoadGameConfig(filename string) (*GameConfig, error) {
 	data, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, err

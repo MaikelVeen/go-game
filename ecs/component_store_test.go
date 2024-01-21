@@ -7,6 +7,8 @@ import (
 )
 
 func TestComponentStore(t *testing.T) {
+	t.Parallel()
+
 	type TestComponent struct {
 		value rune
 	}

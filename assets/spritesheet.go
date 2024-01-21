@@ -1,6 +1,22 @@
 package assets
 
-import "image"
+import (
+	"image"
+
+	"github.com/hajimehoshi/ebiten/v2"
+)
+
+type SpriteSheet struct {
+	Image *ebiten.Image
+	Slice [][]image.Rectangle
+}
+
+func NewSpriteSheet(image *ebiten.Image, slice [][]image.Rectangle) *SpriteSheet {
+	return &SpriteSheet{
+		Image: image,
+		Slice: slice,
+	}
+}
 
 // SliceImage creates a slice of image.Rectangle pointers
 // that can be used to draw sprites from a sprite sheet.
@@ -20,4 +36,8 @@ func SliceImage(columns, rows, width, height int) [][]image.Rectangle {
 	}
 
 	return images
+}
+
+func (s *SpriteSheet) Sprite(x, y int) *ebiten.Image {
+	return s.Image.SubImage(s.Slice[x][y]).(*ebiten.Image)
 }

@@ -1,0 +1,7 @@
+spriteSheets:
+  - name: playerSpriteSheet
+    path: sprites/base_player.png
+    cols: 3
+    rows: 4
+    frameSize: 16
+    

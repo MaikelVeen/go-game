@@ -9,6 +9,8 @@ import (
 )
 
 func TestEntitySignatureChanged(t *testing.T) {
+	t.Parallel()
+
 	systemManager := NewSystemManager()
 	mockSystem := &MockSystem{
 		entities: make(map[Entity]struct{}),

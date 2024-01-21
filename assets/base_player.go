@@ -1,8 +1,6 @@
 package assets
 
-import "github.com/hajimehoshi/ebiten/v2"
-
-var (
+/*var (
 	PlayerSpriteSheet = SliceImage(3, 4, 16, 16)
 	PlayerIdle        *ebiten.Image
 )
@@ -16,3 +14,4 @@ func init() {
 	ebitenImage := ebiten.NewImageFromImage(img)
 	PlayerIdle = ebitenImage.SubImage(PlayerSpriteSheet[1][0]).(*ebiten.Image)
 }
+*/

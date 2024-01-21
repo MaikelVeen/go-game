@@ -72,7 +72,7 @@ func (s *RenderSystem) Draw(screen *ebiten.Image) {
 			float64(tranform.Y),
 		)
 
-		s.offScreenImage.DrawImage(sr.Image, op)
+		s.offScreenImage.DrawImage(sr.GetSprite(), op)
 	}
 
 	// Scale the offscreen image.

@@ -3,6 +3,7 @@ package main
 import (
 	"log/slog"
 
+	"github.com/MaikelVeen/go-game/assets"
 	"github.com/MaikelVeen/go-game/data"
 	"github.com/MaikelVeen/go-game/ecs"
 	"github.com/MaikelVeen/go-game/game"
@@ -25,13 +26,25 @@ func main() {
 		ecs.NewSystemManager(),
 	)
 
-	config, err := data.LoadConfig("game.yaml")
+	gameConfig, err := data.LoadGameConfig("game.yaml")
 	if err != nil {
 		slog.Error(err.Error())
 		panic(err)
 	}
 
-	game := game.New(config, coordinator)
+	assetConfig, err := data.LoadAssetConfig("assets.yaml")
+	if err != nil {
+		slog.Error(err.Error())
+		panic(err)
+	}
+
+	assets.GlobalAssetRegistry = assets.NewAssetRegistry()
+	if err := assets.GlobalAssetRegistry.LoadAssets(assets.StaticSpritesFS, assetConfig); err != nil {
+		slog.Error(err.Error())
+		panic(err)
+	}
+
+	game := game.New(gameConfig, coordinator)
 
 	if err := ebiten.RunGame(game); err != nil {
 		slog.Error(err.Error())
