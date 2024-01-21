@@ -30,6 +30,14 @@ func TestEntitySignatureChanged(t *testing.T) {
 	systemManager.EntitySignatureChanged(entity, signature)
 	assert.Len(t, mockSystem.entities, 1)
 
+	// If another component is added that the system is not interested in,
+	// the entity should be remain because all the components the system is interested in are still present.
+	signature.Set(15)
+	systemManager.EntitySignatureChanged(entity, signature)
+	assert.Len(t, mockSystem.entities, 1)
+
+	// If a component is removed that the system is interested in,
+	// the entity should be removed from the system.
 	signature.Clear(10)
 	systemManager.EntitySignatureChanged(entity, signature)
 	assert.Len(t, mockSystem.entities, 0)

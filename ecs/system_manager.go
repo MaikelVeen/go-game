@@ -69,7 +69,9 @@ func (sm *SystemManager) EntitySignatureChanged(entity Entity, sig Signature) {
 	for sysType, sys := range sm.systems {
 		systemSignature := sm.signatures[sysType]
 
-		if sig.Equal(systemSignature) {
+		// Check if all bits in the system's signature are set in the entity's signature.
+		intersection := sig.Intersection(systemSignature)
+		if intersection.Equal(systemSignature) {
 			sys.AddEntity(entity)
 		} else {
 			sys.EntityDestroyed(entity)
