@@ -10,6 +10,7 @@ var ComponentMapping = map[string]uint8{
 	"transform":        TransformComponentType,
 	"spriteRender":     SpriteRenderComponentType,
 	"playerController": PlayerControllerType,
+	"boundingBox":      BoundingBoxComponentType,
 }
 
 var ComponentTypeMapping = map[uint8]reflect.Type{

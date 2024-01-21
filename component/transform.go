@@ -14,6 +14,7 @@ type Transform struct {
 	Vector *types.Vector2
 }
 
+// SetData implements Component.
 func (t *Transform) SetData(data map[string]any) error {
 	vec := &types.Vector2{}
 

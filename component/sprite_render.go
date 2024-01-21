@@ -17,6 +17,7 @@ type SpriteRender struct {
 	X, Y int
 }
 
+// SetData implements Component.
 func (s *SpriteRender) SetData(data map[string]any) error {
 	spriteSheetName, exists := data["spriteSheet"].(string)
 	if !exists {
