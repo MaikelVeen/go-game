@@ -13,6 +13,13 @@ var _ ecs.System = &RenderSystem{}
 type RenderSystem struct {
 	componentManager *ecs.ComponentManager
 	entities         map[ecs.Entity]struct{}
+
+	// offScreenImage is the image that is rendered to by the RenderSystem.
+	// This image is then scaled and drawn to the screen.
+	offScreenImage *ebiten.Image
+
+	// scaleFactor is the factor by which the offScreenImage is scaled.
+	scaleFactor float64
 }
 
 // There is a bug here if a system depends on multiple
@@ -24,9 +31,16 @@ func (s *RenderSystem) EntityDestroyed(entity ecs.Entity) {
 	delete(s.entities, entity)
 }
 
-func NewRenderSystem(cm *ecs.ComponentManager) *RenderSystem {
+func NewRenderSystem(
+	cm *ecs.ComponentManager,
+	offScreenImage *ebiten.Image,
+	scale float64,
+) *RenderSystem {
 	return &RenderSystem{
 		componentManager: cm,
+		entities:         make(map[ecs.Entity]struct{}),
+		offScreenImage:   offScreenImage,
+		scaleFactor:      scale,
 	}
 }
 
@@ -35,7 +49,8 @@ func (s *RenderSystem) Update() error {
 }
 
 func (s *RenderSystem) Draw(screen *ebiten.Image) {
-	println("RenderSystem.Draw")
+	s.offScreenImage.Clear()
+
 	for entity := range s.entities {
 		t, err := s.componentManager.GetComponent(entity, ecs.ComponentType(components.TransformComponentType))
 		if err != nil {
@@ -57,6 +72,12 @@ func (s *RenderSystem) Draw(screen *ebiten.Image) {
 			float64(tranform.Y),
 		)
 
-		screen.DrawImage(sr.Image, op)
+		s.offScreenImage.DrawImage(sr.Image, op)
 	}
+
+	// Scale the offscreen image.
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Scale(float64(s.scaleFactor), float64(s.scaleFactor))
+
+	screen.DrawImage(s.offScreenImage, op)
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 
+	"github.com/MaikelVeen/go-game/assets"
 	"github.com/MaikelVeen/go-game/components"
 	"github.com/MaikelVeen/go-game/ecs"
 	"github.com/MaikelVeen/go-game/system"
@@ -38,7 +39,11 @@ func New(coordinator *ecs.Coordinator) *Game {
 
 func (g *Game) registerSystems() error {
 	// Register RenderSystem.
-	renderSystem := system.NewRenderSystem(g.coordinator.ComponentManager)
+	renderSystem := system.NewRenderSystem(
+		g.coordinator.ComponentManager,
+		ebiten.NewImage(320, 240),
+		4,
+	)
 	g.coordinator.RegisterSystem(system.RenderSystemType, renderSystem)
 
 	// Set signature for RenderSystem.
@@ -70,7 +75,9 @@ func (g *Game) createEntities() error {
 	if err := g.coordinator.AddComponent(
 		player,
 		ecs.ComponentType(components.SpriteRenderComponentType),
-		&components.SpriteRender{},
+		&components.SpriteRender{
+			Image: assets.PlayerIdle,
+		},
 	); err != nil {
 		return err
 	}

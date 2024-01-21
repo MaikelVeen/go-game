@@ -14,5 +14,5 @@ func init() {
 	}
 
 	ebitenImage := ebiten.NewImageFromImage(img)
-	PlayerIdle = ebitenImage.SubImage(PlayerSpriteSheet[0][1]).(*ebiten.Image)
+	PlayerIdle = ebitenImage.SubImage(PlayerSpriteSheet[1][0]).(*ebiten.Image)
 }
