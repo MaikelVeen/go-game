@@ -6,6 +6,12 @@ type Component interface {
 	SetData(data map[string]any) error
 }
 
+// PhysicsComponent is a component that is used by the physics system.
+type PhysicsComponent interface {
+	Component
+	Init() error
+}
+
 // ComponentMapping maps a component name to a component type.
 // In the data.GameConfig struct, the component names are used
 // for the components of entities.

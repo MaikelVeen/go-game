@@ -53,7 +53,7 @@ func (s *PhysicsSystem) EntityDestroyed(entity ecs.Entity) {
 func (*PhysicsSystem) Draw(screen *ebiten.Image) {} // Noop.
 
 // Update implements ecs.System.
-func (*PhysicsSystem) Update() error {
-	// TODO: Implement.
+func (s *PhysicsSystem) Update() error {
+	s.space.Step(1.0 / float64(ebiten.TPS()))
 	return nil
 }

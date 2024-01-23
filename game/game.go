@@ -59,7 +59,10 @@ func (g *Game) registerSystems() error {
 	if err := g.registerSystem(
 		physics.SystemType,
 		physics.New(g.coordinator.ComponentManager, cp.NewSpace()),
-		ecs.NewSignature(),
+		ecs.NewSignature(
+			ecs.ComponentType(component.TransformComponentType),
+			ecs.ComponentType(component.RigidbodyComponentType),
+		),
 	); err != nil {
 		return err
 	}
