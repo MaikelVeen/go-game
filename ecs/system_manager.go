@@ -22,6 +22,16 @@ func NewSystemManager() *SystemManager {
 	}
 }
 
+// Init initializes all registered systems.
+func (sm *SystemManager) Init() error {
+	for _, sys := range sm.systems {
+		if err := sys.Init(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // ForEachSystem iterates over all systems and calls the provided function.
 // If the function returns an error, the iteration is stopped and the error is returned.
 func (sm *SystemManager) ForEachSystem(fn func(System) error) error {

@@ -22,7 +22,6 @@ func TestSpriteRender_SetData(t *testing.T) {
 	}{
 		{
 			name: "should set SpriteSheet, X and Y correctly",
-
 			args: args{
 				data: map[string]interface{}{
 					"spriteSheetName": "testSpriteSheet",

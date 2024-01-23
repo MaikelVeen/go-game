@@ -2,6 +2,7 @@ package game
 
 import (
 	"fmt"
+	"log/slog"
 	"reflect"
 
 	"github.com/MaikelVeen/go-game/component"
@@ -39,6 +40,16 @@ func New(config *data.GameConfig, coordinator *ecs.Coordinator) (*Game, error) {
 	}
 
 	return g, nil
+}
+
+func (g *Game) Init() error {
+	err := g.coordinator.InitSystems()
+	if err != nil {
+		return err
+	}
+
+	slog.Info("Game initialized")
+	return nil
 }
 
 func (g *Game) registerSystems() error {

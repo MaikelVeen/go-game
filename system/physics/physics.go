@@ -3,6 +3,7 @@ package physics
 import (
 	"log/slog"
 
+	"github.com/MaikelVeen/go-game/component"
 	"github.com/MaikelVeen/go-game/ecs"
 	ebiten "github.com/hajimehoshi/ebiten/v2"
 	"github.com/jakecoffman/cp/v2"
@@ -33,6 +34,43 @@ func New(
 
 // Init implements ecs.System.
 func (s *PhysicsSystem) Init() error {
+	// Iterate over all entities. Get the Transform component and
+	// set the position of the body to the position of the Transform.
+	for entity := range s.entities {
+		t, err := s.componentManager.GetComponent(
+			entity,
+			ecs.ComponentType(component.TransformComponentType),
+		)
+		if err != nil {
+			return err
+		}
+		// Typecast to *component.Transform.
+		transform, ok := t.(*component.Transform)
+		if !ok {
+			return err
+		}
+
+		rb, err := s.componentManager.GetComponent(
+			entity,
+			ecs.ComponentType(component.RigidbodyComponentType),
+		)
+		if err != nil {
+			return err
+		}
+		// Typecast to *component.Rigidbody.
+		rigidbody, ok := rb.(*component.Rigidbody)
+		if !ok {
+			return err
+		}
+
+		if err := rigidbody.Init(); err != nil {
+			return err
+		}
+
+		slog.Debug("Setting position of body", "entity", entity, "position", transform.Vector)
+		rigidbody.Body.SetPosition(*transform.Vector)
+	}
+
 	return nil
 }
 

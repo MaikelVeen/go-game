@@ -58,6 +58,12 @@ func main() {
 		return
 	}
 
+	// Init game.
+	if err := game.Init(); err != nil {
+		slog.Error("Could not init game", "error", err)
+		return
+	}
+
 	if err := ebiten.RunGame(game); err != nil {
 		slog.Error(err.Error())
 	}
