@@ -7,10 +7,9 @@ type SystemType uint8
 
 type System interface {
 	// TODO: Extract this to a seperate interface?.
-	AddEntity(entity Entity)
+	AddEntity(entity Entity) error
 	EntityDestroyed(entity Entity)
 
-	Init() error
 	Update() error
 	Draw(screen *ebiten.Image)
 }

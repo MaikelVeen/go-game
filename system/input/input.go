@@ -31,21 +31,18 @@ func New(cm *ecs.ComponentManager) *InputSystem {
 	}
 }
 
-func (s *InputSystem) AddEntity(entity ecs.Entity) {
+func (s *InputSystem) AddEntity(entity ecs.Entity) error {
 	if _, exists := s.entities[entity]; exists {
-		return
+		return nil
 	}
 
 	s.entities[entity] = struct{}{}
 	slog.Debug("Added entity to InputSystem", "entity", entity)
+	return nil
 }
 
 func (s *InputSystem) EntityDestroyed(entity ecs.Entity) {
 	delete(s.entities, entity)
-}
-
-func (s *InputSystem) Init() error {
-	return nil
 }
 
 // Draw implements ecs.System.
@@ -68,22 +65,32 @@ func (s *InputSystem) Draw(screen *ebiten.Image) {
 // is updated with the new velocity.
 func (s *InputSystem) Update() error {
 	s.currentDirection = s.Direction()
+
 	for entity := range s.entities {
 		// Get the player controller component.
 		pc, err := s.componentManager.GetComponent(entity, ecs.ComponentType(component.PlayerControllerType))
 		if err != nil {
 			return err
 		}
-		playerController := pc.(*component.PlayerController)
-
-		_ = playerController.Speed
+		playerController, ok := pc.(*component.PlayerController)
+		if !ok {
+			return fmt.Errorf("could not typecast component to PlayerController")
+		}
+		speed := playerController.Speed
 
 		// Get the rigidbody component.
 		rb, err := s.componentManager.GetComponent(entity, ecs.ComponentType(component.RigidbodyComponentType))
 		if err != nil {
 			return err
 		}
-		_ = rb.(*component.Rigidbody)
+		rigidbody, ok := rb.(*component.Rigidbody)
+		if !ok {
+			return fmt.Errorf("could not typecast component to Rigidbody")
+		}
+
+		// Update the rigidbody velocity.
+		velocity := s.currentDirection.Mult(speed)
+		rigidbody.Body.SetVelocity(velocity.X, velocity.Y)
 	}
 
 	return nil

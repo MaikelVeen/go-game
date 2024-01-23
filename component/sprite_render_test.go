@@ -24,15 +24,15 @@ func TestSpriteRender_SetData(t *testing.T) {
 			name: "should set SpriteSheet, X and Y correctly",
 			args: args{
 				data: map[string]interface{}{
-					"spriteSheetName": "testSpriteSheet",
-					"x":               10,
-					"y":               20,
+					"spriteSheet": "testSpriteSheet",
+					"x":           10,
+					"y":           20,
 				},
 			},
 			wantErr: false,
 		},
 		{
-			name: "should return error when spriteSheetName is missing",
+			name: "should return error when spriteSheet is missing",
 			args: args{
 				data: map[string]interface{}{
 					"x": 10,
@@ -45,8 +45,8 @@ func TestSpriteRender_SetData(t *testing.T) {
 			name: "should return error when X is missing",
 			args: args{
 				data: map[string]interface{}{
-					"spriteSheetName": "testSpriteSheet",
-					"y":               20,
+					"spriteSheet": "testSpriteSheet",
+					"y":           20,
 				},
 			},
 			wantErr: true,
@@ -72,7 +72,7 @@ func TestSpriteRender_SetData(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, tt.args.data["x"], sr.X)
 				assert.Equal(t, tt.args.data["y"], sr.Y)
-				assert.Equal(t, assets.GlobalAssetRegistry.SpriteSheets[tt.args.data["spriteSheetName"].(string)], sr.SpriteSheet)
+				assert.Equal(t, assets.GlobalAssetRegistry.SpriteSheets[tt.args.data["spriteSheet"].(string)], sr.SpriteSheet)
 			}
 		})
 	}

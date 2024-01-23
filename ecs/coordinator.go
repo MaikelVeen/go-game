@@ -108,8 +108,3 @@ func (c *Coordinator) SetSystemSignature(sysType SystemType, sig Signature) erro
 	slog.Debug("Setting system signature", "systemType", sysType, "signature", sig)
 	return c.SystemManager.SetSignature(sysType, sig)
 }
-
-// InitSystems initializes all registered systems.
-func (c *Coordinator) InitSystems() error {
-	return c.SystemManager.Init()
-}

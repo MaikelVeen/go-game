@@ -12,8 +12,8 @@ entities:
           y: 0
       - type: playerController
         data:
-          speed: 2.0
+          speed: 50.0
       - type: rigidbody
         data:
-          mass: 1.0
+          mass: 100.0
       

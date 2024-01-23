@@ -1,6 +1,7 @@
 package physics
 
 import (
+	"fmt"
 	"log/slog"
 
 	"github.com/MaikelVeen/go-game/component"
@@ -16,8 +17,11 @@ var _ ecs.System = &PhysicsSystem{}
 // PhysicsSystem is a system that handles physics.
 type PhysicsSystem struct {
 	componentManager *ecs.ComponentManager
-	entities         map[ecs.Entity]struct{}
-	space            *cp.Space
+	entities         map[ecs.Entity]struct {
+		rigidbody *component.Rigidbody
+		transform *component.Transform
+	}
+	space *cp.Space
 }
 
 // New returns a new PhysicsSystem.
@@ -27,60 +31,67 @@ func New(
 ) *PhysicsSystem {
 	return &PhysicsSystem{
 		componentManager: cm,
-		entities:         make(map[ecs.Entity]struct{}),
-		space:            space,
+		entities: make(map[ecs.Entity]struct {
+			rigidbody *component.Rigidbody
+			transform *component.Transform
+		}),
+		space: space,
 	}
 }
 
-// Init implements ecs.System.
-func (s *PhysicsSystem) Init() error {
-	// Iterate over all entities. Get the Transform component and
-	// set the position of the body to the position of the Transform.
-	for entity := range s.entities {
-		t, err := s.componentManager.GetComponent(
-			entity,
-			ecs.ComponentType(component.TransformComponentType),
-		)
-		if err != nil {
-			return err
-		}
-		// Typecast to *component.Transform.
-		transform, ok := t.(*component.Transform)
-		if !ok {
-			return err
-		}
-
-		rb, err := s.componentManager.GetComponent(
-			entity,
-			ecs.ComponentType(component.RigidbodyComponentType),
-		)
-		if err != nil {
-			return err
-		}
-		// Typecast to *component.Rigidbody.
-		rigidbody, ok := rb.(*component.Rigidbody)
-		if !ok {
-			return err
-		}
-
-		if err := rigidbody.Init(); err != nil {
-			return err
-		}
-
-		slog.Debug("Setting position of body", "entity", entity, "position", transform.Vector)
-		rigidbody.Body.SetPosition(*transform.Vector)
+func (s *PhysicsSystem) AddEntity(entity ecs.Entity) error {
+	if _, exists := s.entities[entity]; exists {
+		return nil
 	}
 
+	components, err := s.initEntity(entity)
+	if err != nil {
+		return err
+	}
+
+	s.entities[entity] = *components
+	s.space.AddBody(components.rigidbody.Body)
+	slog.Debug("Added entity to InputSystem", "entity", entity)
 	return nil
 }
 
-func (s *PhysicsSystem) AddEntity(entity ecs.Entity) {
-	if _, exists := s.entities[entity]; exists {
-		return
+func (s *PhysicsSystem) initEntity(entity ecs.Entity) (*struct {
+	rigidbody *component.Rigidbody
+	transform *component.Transform
+}, error) {
+	t, err := s.componentManager.GetComponent(entity, ecs.ComponentType(component.TransformComponentType))
+	if err != nil {
+		return nil, err
+	}
+	transform, ok := t.(*component.Transform)
+	if !ok {
+		return nil, fmt.Errorf("could not typecast component to *component.Transform")
 	}
 
-	s.entities[entity] = struct{}{}
-	slog.Debug("Added entity to InputSystem", "entity", entity)
+	rb, err := s.componentManager.GetComponent(entity, ecs.ComponentType(component.RigidbodyComponentType))
+	if err != nil {
+		return nil, err
+	}
+	rigidbody, ok := rb.(*component.Rigidbody)
+	if !ok {
+		return nil, fmt.Errorf("could not typecast component to *component.Rigidbody")
+	}
+
+	if err := rigidbody.Init(); err != nil {
+		return nil, err
+	}
+
+	slog.Debug("Setting initial position of body", "entity", entity, "position", transform.Vector)
+	rigidbody.Body.SetPosition(transform.Vector)
+
+	// TODO: Create a struct type for this.
+	return &struct {
+		rigidbody *component.Rigidbody
+		transform *component.Transform
+	}{
+		rigidbody: rigidbody,
+		transform: transform,
+	}, nil
 }
 
 func (s *PhysicsSystem) EntityDestroyed(entity ecs.Entity) {
@@ -93,5 +104,9 @@ func (*PhysicsSystem) Draw(screen *ebiten.Image) {} // Noop.
 // Update implements ecs.System.
 func (s *PhysicsSystem) Update() error {
 	s.space.Step(1.0 / float64(ebiten.TPS()))
+
+	for _, components := range s.entities {
+		components.transform.Vector = components.rigidbody.Body.Position()
+	}
 	return nil
 }

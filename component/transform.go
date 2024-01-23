@@ -14,12 +14,12 @@ const (
 var _ Component = (*Transform)(nil)
 
 type Transform struct {
-	Vector *types.Vector2
+	Vector types.Vector2
 }
 
 // SetData implements Component.
 func (t *Transform) SetData(data map[string]any) error {
-	vec := &types.Vector2{}
+	vec := types.Vector2{}
 
 	x, ok := data["x"]
 	if !ok {

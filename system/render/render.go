@@ -43,13 +43,14 @@ func (s *RenderSystem) Init() error {
 	return nil
 }
 
-func (s *RenderSystem) AddEntity(entity ecs.Entity) {
+func (s *RenderSystem) AddEntity(entity ecs.Entity) error {
 	if _, exists := s.entities[entity]; exists {
-		return
+		return nil
 	}
 
 	s.entities[entity] = struct{}{}
 	slog.Debug("Added entity to RenderSystem", "entity", entity)
+	return nil
 }
 
 func (s *RenderSystem) EntityDestroyed(entity ecs.Entity) {
@@ -69,8 +70,7 @@ func (s *RenderSystem) Draw(screen *ebiten.Image) {
 
 	// Scale the offscreen image.
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(s.scaleFactor, s.scaleFactor)
-
+	op.GeoM.Scale(s.scaleFactor, s.scaleFactor) // TODO: Scale factor should be dyanamic based on diff between screen size and offscreen image size.
 	screen.DrawImage(s.offScreenImage, op)
 }
 

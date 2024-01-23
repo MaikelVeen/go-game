@@ -47,8 +47,9 @@ type MockSystem struct {
 	entities map[Entity]struct{}
 }
 
-func (ms *MockSystem) AddEntity(entity Entity) {
+func (ms *MockSystem) AddEntity(entity Entity) error {
 	ms.entities[entity] = struct{}{}
+	return nil
 }
 
 func (ms *MockSystem) EntityDestroyed(entity Entity) {
