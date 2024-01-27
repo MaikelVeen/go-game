@@ -88,8 +88,13 @@ func (s *InputSystem) Update() error {
 			return fmt.Errorf("could not typecast component to Rigidbody")
 		}
 
-		// Update the rigidbody velocity.
-		velocity := s.currentDirection.Mult(speed)
+		if s.currentDirection.Equal(types.Vector2{}) {
+			rigidbody.Body.SetVelocity(0, 0)
+			continue
+		}
+
+		// Normalize the direction and multiply it by the speed.
+		velocity := s.currentDirection.Normalize().Mult(speed)
 		rigidbody.Body.SetVelocity(velocity.X, velocity.Y)
 	}
 
