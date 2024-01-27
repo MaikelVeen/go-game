@@ -78,6 +78,7 @@ func (s *InputSystem) Update() error {
 		}
 		speed := playerController.Speed
 
+		// TOOD: Should the input system be responsible for updatring the velocity of the rigidbody?
 		// Get the rigidbody component.
 		rb, err := s.componentManager.GetComponent(entity, ecs.ComponentType(component.RigidbodyComponentType))
 		if err != nil {

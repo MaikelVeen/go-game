@@ -15,5 +15,5 @@ entities:
           speed: 50.0
       - type: rigidbody
         data:
-          mass: 100.0
+          mass: 10.0
       

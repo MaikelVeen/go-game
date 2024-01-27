@@ -68,10 +68,21 @@ func (s *RenderSystem) Draw(screen *ebiten.Image) {
 		drawEntity(s, entity)
 	}
 
+	screenWidth, screenHeight := getScreenSize()
+	scaleFactorX := float64(screenWidth) / float64(s.offScreenImage.Bounds().Dx())
+	scaleFactorY := float64(screenHeight) / float64(s.offScreenImage.Bounds().Dy())
+
 	// Scale the offscreen image.
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(s.scaleFactor, s.scaleFactor) // TODO: Scale factor should be dyanamic based on diff between screen size and offscreen image size.
+	op.GeoM.Scale(scaleFactorX, scaleFactorY)
 	screen.DrawImage(s.offScreenImage, op)
+}
+
+func getScreenSize() (int, int) {
+	if ebiten.IsFullscreen() {
+		return ebiten.ScreenSizeInFullscreen()
+	}
+	return ebiten.WindowSize()
 }
 
 func drawEntity(s *RenderSystem, entity ecs.Entity) {

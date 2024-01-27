@@ -72,7 +72,7 @@ func (g *Game) registerSystems() error {
 		render.SystemType,
 		render.New(
 			g.coordinator.ComponentManager,
-			ebiten.NewImage(320, 240),
+			ebiten.NewImage(640, 330),
 			4,
 		),
 		ecs.NewSignature(
