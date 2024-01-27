@@ -62,6 +62,7 @@ func (g *Game) registerSystems() error {
 		ecs.NewSignature(
 			ecs.ComponentType(component.TransformComponentType),
 			ecs.ComponentType(component.RigidbodyComponentType),
+			ecs.ComponentType(component.BoxColliderComponentType),
 		),
 	); err != nil {
 		return err

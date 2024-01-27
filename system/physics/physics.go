@@ -81,9 +81,14 @@ func (s *PhysicsSystem) initEntity(entity ecs.Entity) (*struct {
 		return nil, err
 	}
 
+	// TODO: Collision callbacks to ensure that the player does not glitch into walls.
+	shape := cp.NewBox(rigidbody.Body, 16, 16, 0)
+	rigidbody.Body.AddShape(shape)
+
 	slog.Debug("Setting initial position of body", "entity", entity, "position", transform.Vector)
 	rigidbody.Body.SetPosition(transform.Vector)
 
+	s.space.AddShape(shape)
 	// TODO: Create a struct type for this.
 	return &struct {
 		rigidbody *component.Rigidbody

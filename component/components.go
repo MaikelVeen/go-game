@@ -29,6 +29,6 @@ var ComponentTypeMapping = map[uint8]reflect.Type{
 	TransformComponentType:    reflect.TypeOf(Transform{}),
 	PlayerControllerType:      reflect.TypeOf(PlayerController{}),
 	SpriteRenderComponentType: reflect.TypeOf(SpriteRender{}),
-	BoxColliderComponentType:  reflect.TypeOf(BoundingBox{}),
+	BoxColliderComponentType:  reflect.TypeOf(BoxCollider{}),
 	RigidbodyComponentType:    reflect.TypeOf(Rigidbody{}),
 }

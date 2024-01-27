@@ -4,4 +4,8 @@ spriteSheets:
     cols: 3
     rows: 4
     frameSize: 16
-    
+  - name: trunk
+    path: sprites/trunk.png
+    cols: 1
+    rows: 1
+    frameSize: 16 

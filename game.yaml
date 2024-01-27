@@ -15,5 +15,22 @@ entities:
           speed: 50.0
       - type: rigidbody
         data:
+          static: false
           mass: 10.0
-      
+      - type: boxCollider
+  - name: trunk 
+    components:
+      - type: transform
+        data:
+          x: 100.0
+          y: 250.0
+      - type: spriteRender
+        data:
+          spriteSheet: trunk 
+          x: 0
+          y: 0
+      - type: rigidbody
+        data:
+          static: true
+          mass: 10.0    
+      - type: boxCollider
