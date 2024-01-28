@@ -15,8 +15,8 @@ entities:
           speed: 50.0
       - type: rigidbody
         data:
-          static: false
-          mass: 10.0
+          type: dynamic
+          mass: 1.0
       - type: boxCollider
   - name: trunk 
     components:
@@ -31,6 +31,5 @@ entities:
           y: 0
       - type: rigidbody
         data:
-          static: true
-          mass: 10.0    
+          type: static
       - type: boxCollider

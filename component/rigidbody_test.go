@@ -13,27 +13,40 @@ func TestRigidbody_SetData(t *testing.T) {
 		name     string
 		data     map[string]interface{}
 		wantErr  bool
-		wantMass float64
+		wantMass *float64
+		wantType RigidbodyType
 	}{
 		{
-			name: "should set mass correctly",
+			name: "should set mass and type correctly",
 			data: map[string]interface{}{
 				"mass": 10.0,
+				"type": "dynamic",
 			},
 			wantErr:  false,
-			wantMass: 10.0,
+			wantMass: func() *float64 { f := 10.0; return &f }(),
+			wantType: RigidbodyTypeDynamic,
 		},
 		{
-			name:    "should not return error when mass is missing",
-			data:    map[string]interface{}{},
-			wantErr: false,
-		},
-		{
-			name: "should not return error when mass is not a float64",
+			name: "should not return error when mass is missing",
 			data: map[string]interface{}{
-				"mass": "heavy",
+				"type": "dynamic",
 			},
 			wantErr: false,
+		},
+		{
+			name: "should return error when mass is not a float64",
+			data: map[string]interface{}{
+				"type": "dynamic",
+				"mass": "heavy",
+			},
+			wantErr: true,
+		},
+		{
+			name: "should return error when type is invalid",
+			data: map[string]interface{}{
+				"type": "invalid",
+			},
+			wantErr: true,
 		},
 	}
 
@@ -48,7 +61,11 @@ func TestRigidbody_SetData(t *testing.T) {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
-				assert.Equal(t, tt.wantMass, rb.Mass)
+				if tt.wantMass != nil {
+					assert.NotNil(t, rb.mass)
+					assert.EqualValues(t, *tt.wantMass, *rb.mass)
+				}
+				assert.Equal(t, tt.wantType, rb.Type)
 			}
 		})
 	}

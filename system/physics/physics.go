@@ -76,7 +76,7 @@ func (s *PhysicsSystem) initEntity(entity ecs.Entity) (*struct {
 	if !ok {
 		return nil, fmt.Errorf("could not typecast component to *component.Rigidbody")
 	}
-
+	//TODO: Add a test to assert that this function returns an error when the mass is not set and the type is dynamic.
 	if err := rigidbody.Init(); err != nil {
 		return nil, err
 	}
