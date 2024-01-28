@@ -96,7 +96,15 @@ func (s *InputSystem) Update() error {
 
 		// Normalize the direction and multiply it by the speed.
 		velocity := s.currentDirection.Normalize().Mult(speed)
-		rigidbody.Body.SetVelocity(velocity.X, velocity.Y)
+		rigidbody.Body.SetForce(velocity)
+
+		// Apply drag to the current velocity.
+		dragFactor := 0.9
+		currentVelocity := rigidbody.Body.Velocity()
+		draggedVelocity := currentVelocity.Mult(dragFactor)
+
+		// Set the new velocity of the rigidbody.
+		rigidbody.Body.SetVelocityVector(draggedVelocity)
 	}
 
 	return nil

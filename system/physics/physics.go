@@ -89,7 +89,6 @@ func (s *PhysicsSystem) initEntity(entity ecs.Entity) (*struct {
 	rigidbody.Body.SetPosition(transform.Vector)
 
 	s.space.AddShape(shape)
-	// TODO: Create a struct type for this.
 	return &struct {
 		rigidbody *component.Rigidbody
 		transform *component.Transform

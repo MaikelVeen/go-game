@@ -12,7 +12,7 @@ entities:
           y: 0
       - type: playerController
         data:
-          speed: 50.0
+          speed: 200.0
       - type: rigidbody
         data:
           type: dynamic
@@ -22,8 +22,8 @@ entities:
     components:
       - type: transform
         data:
-          x: 100.0
-          y: 250.0
+          x: 0
+          y: 0
       - type: spriteRender
         data:
           spriteSheet: trunk 
