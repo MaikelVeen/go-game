@@ -5,26 +5,31 @@ import (
 	"reflect"
 
 	"github.com/MaikelVeen/go-game/component"
+	"github.com/MaikelVeen/go-game/component/boxcollider"
+	"github.com/MaikelVeen/go-game/component/playercontroller"
+	"github.com/MaikelVeen/go-game/component/rigidbody"
+	"github.com/MaikelVeen/go-game/component/spriterenderer"
+	"github.com/MaikelVeen/go-game/component/transform"
 	"github.com/MaikelVeen/go-game/data"
-	"github.com/MaikelVeen/go-game/ecs"
+	"github.com/MaikelVeen/go-game/entity"
+	"github.com/MaikelVeen/go-game/system"
 	"github.com/MaikelVeen/go-game/system/input"
 	"github.com/MaikelVeen/go-game/system/physics"
 	"github.com/MaikelVeen/go-game/system/render"
 	"github.com/MaikelVeen/go-game/timer"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
-	"github.com/jakecoffman/cp/v2"
 )
 
 var _ ebiten.Game = &Game{}
 
 type Game struct {
 	config      *data.GameConfig
-	coordinator *ecs.Coordinator
+	coordinator *Coordinator
 }
 
 // New returns a new Game.
-func New(config *data.GameConfig, coordinator *ecs.Coordinator) (*Game, error) {
+func New(config *data.GameConfig, coordinator *Coordinator) (*Game, error) {
 	g := &Game{
 		config:      config,
 		coordinator: coordinator,
@@ -46,10 +51,10 @@ func (g *Game) registerSystems() error {
 
 	// Register InputSystem.
 	if err := g.registerSystem(
-		input.SystemType,
-		input.New(g.coordinator.ComponentManager),
-		ecs.NewSignature(
-			ecs.ComponentType(component.PlayerControllerType),
+		system.InputType,
+		input.New(g.coordinator.ComponentRegistry),
+		entity.NewSignature(
+			playercontroller.Type,
 		),
 	); err != nil {
 		return err
@@ -57,12 +62,12 @@ func (g *Game) registerSystems() error {
 
 	// Register PhysicsSystem.
 	if err := g.registerSystem(
-		physics.SystemType,
-		physics.New(g.coordinator.ComponentManager, cp.NewSpace()),
-		ecs.NewSignature(
-			ecs.ComponentType(component.TransformComponentType),
-			ecs.ComponentType(component.RigidbodyComponentType),
-			ecs.ComponentType(component.BoxColliderComponentType),
+		system.PhysicsType,
+		physics.New(g.coordinator.ComponentRegistry),
+		entity.NewSignature(
+			transform.Type,
+			rigidbody.Type,
+			boxcollider.Type, // When there are multiple colliders, how should this be handled?
 		),
 	); err != nil {
 		return err
@@ -70,16 +75,11 @@ func (g *Game) registerSystems() error {
 
 	// Register RenderSystem.
 	if err := g.registerSystem(
-		render.SystemType,
-		render.New(
-			g.coordinator.ComponentManager,
-			ebiten.NewImage(640, 330),
-			4,
-		),
-		ecs.NewSignature(
-			ecs.ComponentType(component.TransformComponentType),
-			ecs.ComponentType(component.SpriteRenderComponentType),
-		),
+		system.RenderType,
+		render.New(g.coordinator.ComponentRegistry, ebiten.NewImage(640, 330)),
+		entity.NewSignature(
+			transform.Type,
+			spriterenderer.Type),
 	); err != nil {
 		return err
 	}
@@ -88,7 +88,7 @@ func (g *Game) registerSystems() error {
 }
 
 // registerSystem registers a system and sets its signature.
-func (g *Game) registerSystem(sysType ecs.SystemType, sys ecs.System, sig ecs.Signature) error {
+func (g *Game) registerSystem(sysType system.Type, sys system.System, sig entity.Signature) error {
 	if err := g.coordinator.RegisterSystem(sysType, sys); err != nil {
 		return fmt.Errorf("failed to register system: %w", err)
 	}
@@ -132,7 +132,7 @@ func (g *Game) createEntities() error {
 
 			if err := g.coordinator.AddComponent(
 				entity,
-				ecs.ComponentType(componentType),
+				componentType,
 				newComponent,
 			); err != nil {
 				return err

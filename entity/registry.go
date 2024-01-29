@@ -1,4 +1,4 @@
-package ecs
+package entity
 
 import (
 	"fmt"
@@ -6,22 +6,23 @@ import (
 	"github.com/bits-and-blooms/bitset"
 )
 
-// EntityManager manages entities.
-type EntityManager struct {
+// Registry keeps track of all entities and their signatures.
+type Registry struct {
 	nextID      uint
 	signatures  [MaxEntities]Signature
 	entityCount uint32
 }
 
-func NewEntityManager() *EntityManager {
-	return &EntityManager{
+// NewRegistry creates a new entity registry.
+func NewRegistry() *Registry {
+	return &Registry{
 		nextID:      0,
 		signatures:  [MaxEntities]*bitset.BitSet{},
 		entityCount: 0,
 	}
 }
 
-func (em *EntityManager) Create() (Entity, error) {
+func (em *Registry) Create() (Entity, error) {
 	if em.entityCount >= MaxEntities {
 		return 0, fmt.Errorf("too many entities")
 	}
@@ -35,7 +36,7 @@ func (em *EntityManager) Create() (Entity, error) {
 	return id, nil
 }
 
-func (em *EntityManager) Destroy(id Entity) error {
+func (em *Registry) Destroy(id Entity) error {
 	if uint32(id) >= MaxEntities {
 		return fmt.Errorf("invalid entity ID")
 	}
@@ -46,7 +47,7 @@ func (em *EntityManager) Destroy(id Entity) error {
 	return nil
 }
 
-func (em *EntityManager) SetSignature(id Entity, sig Signature) error {
+func (em *Registry) SetSignature(id Entity, sig Signature) error {
 	if uint32(id) >= MaxEntities {
 		return fmt.Errorf("invalid entity ID")
 	}
@@ -55,7 +56,7 @@ func (em *EntityManager) SetSignature(id Entity, sig Signature) error {
 	return nil
 }
 
-func (em *EntityManager) Signature(id Entity) (Signature, error) {
+func (em *Registry) Signature(id Entity) (Signature, error) {
 	if uint32(id) >= MaxEntities {
 		return nil, fmt.Errorf("invalid entity ID")
 	}

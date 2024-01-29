@@ -1,8 +1,9 @@
-package ecs
+package component
 
 import (
 	"testing"
 
+	"github.com/MaikelVeen/go-game/entity"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -13,25 +14,25 @@ func TestComponentStore(t *testing.T) {
 		value rune
 	}
 
-	cs := NewComponentStore[TestComponent]()
+	cs := NewStore[TestComponent]()
 
 	// Add component A to entity 0
-	entity0 := Entity(0)
+	entity0 := entity.Entity(0)
 	componentA := TestComponent{value: 'A'}
 	assert.NoError(t, cs.Add(entity0, componentA))
 
 	// Add component B to entity 1
-	entity1 := Entity(1)
+	entity1 := entity.Entity(1)
 	componentB := TestComponent{value: 'B'}
 	assert.NoError(t, cs.Add(entity1, componentB))
 
 	// Add component C to entity 2
-	entity2 := Entity(2)
+	entity2 := entity.Entity(2)
 	componentC := TestComponent{value: 'C'}
 	assert.NoError(t, cs.Add(entity2, componentC))
 
 	// Add component D to entity 3
-	entity3 := Entity(3)
+	entity3 := entity.Entity(3)
 	componentD := TestComponent{value: 'D'}
 	assert.NoError(t, cs.Add(entity3, componentD))
 
@@ -54,7 +55,7 @@ func TestComponentStore(t *testing.T) {
 	assert.Equal(t, cs.indexToEntityMap[1], entity2)
 
 	// Add new component E to entity 4
-	entity4 := Entity(4)
+	entity4 := entity.Entity(4)
 	componentE := TestComponent{value: 'E'}
 	assert.NoError(t, cs.Add(entity4, componentE))
 

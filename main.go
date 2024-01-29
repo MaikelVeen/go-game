@@ -6,9 +6,11 @@ import (
 	"time"
 
 	"github.com/MaikelVeen/go-game/assets"
+	"github.com/MaikelVeen/go-game/component"
 	"github.com/MaikelVeen/go-game/data"
-	"github.com/MaikelVeen/go-game/ecs"
+	"github.com/MaikelVeen/go-game/entity"
 	"github.com/MaikelVeen/go-game/game"
+	"github.com/MaikelVeen/go-game/system"
 	"github.com/MaikelVeen/go-game/timer"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/lmittmann/tint"
@@ -35,10 +37,10 @@ func main() {
 	)
 	slog.SetDefault(logger)
 
-	coordinator := ecs.NewCoordinator(
-		ecs.NewEntityManager(),
-		ecs.NewComponentManager(),
-		ecs.NewSystemManager(),
+	coordinator := game.NewCoordinator(
+		entity.NewRegistry(),
+		component.NewRegistry(),
+		system.NewRegistry(),
 	)
 
 	gameConfig, err := data.LoadGameConfig(configPath)

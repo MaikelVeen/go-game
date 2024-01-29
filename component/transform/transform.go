@@ -1,4 +1,4 @@
-package component
+package transform
 
 import (
 	"fmt"
@@ -7,11 +7,9 @@ import (
 )
 
 const (
-	TransformComponentName       = "transform"
-	TransformComponentType uint8 = 0
+	Type uint = 0
+	Slug      = "transform"
 )
-
-var _ Component = (*Transform)(nil)
 
 type Transform struct {
 	Vector types.Vector2

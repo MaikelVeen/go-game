@@ -5,83 +5,78 @@ import (
 	"log/slog"
 
 	"github.com/MaikelVeen/go-game/component"
-	"github.com/MaikelVeen/go-game/ecs"
+	"github.com/MaikelVeen/go-game/component/rigidbody"
+	"github.com/MaikelVeen/go-game/component/transform"
+	"github.com/MaikelVeen/go-game/entity"
 	ebiten "github.com/hajimehoshi/ebiten/v2"
 	"github.com/jakecoffman/cp/v2"
 )
 
-const SystemType ecs.SystemType = 1
-
-var _ ecs.System = &PhysicsSystem{}
+const (
+	Type uint8 = 1
+	Slug       = "physics"
+)
 
 // PhysicsSystem is a system that handles physics.
 type PhysicsSystem struct {
-	componentManager *ecs.ComponentManager
-	entities         map[ecs.Entity]struct {
-		rigidbody *component.Rigidbody
-		transform *component.Transform
-	}
-	space *cp.Space
+	componentRegistry *component.Registry
+	entities          map[entity.Entity]*physicsEntity
+	space             *cp.Space
+}
+
+type physicsEntity struct {
+	rigidbody *rigidbody.Rigidbody
+	transform *transform.Transform
 }
 
 // New returns a new PhysicsSystem.
-func New(
-	cm *ecs.ComponentManager,
-	space *cp.Space,
-) *PhysicsSystem {
+func New(componentRegistry *component.Registry) *PhysicsSystem {
 	return &PhysicsSystem{
-		componentManager: cm,
-		entities: make(map[ecs.Entity]struct {
-			rigidbody *component.Rigidbody
-			transform *component.Transform
-		}),
-		space: space,
+		componentRegistry: componentRegistry,
+		entities:          make(map[entity.Entity]*physicsEntity),
+		space:             cp.NewSpace(),
 	}
 }
 
-func (s *PhysicsSystem) AddEntity(entity ecs.Entity) error {
+func (s *PhysicsSystem) AddEntity(entity entity.Entity) error {
 	if _, exists := s.entities[entity]; exists {
 		return nil
 	}
 
-	components, err := s.initEntity(entity)
+	physicsEntity, err := s.initEntity(entity)
 	if err != nil {
 		return err
 	}
 
-	s.entities[entity] = *components
-	s.space.AddBody(components.rigidbody.Body)
-	slog.Debug("Added entity to InputSystem", "entity", entity)
+	s.entities[entity] = physicsEntity
+	s.space.AddBody(physicsEntity.rigidbody.Body)
+
 	return nil
 }
 
-func (s *PhysicsSystem) initEntity(entity ecs.Entity) (*struct {
-	rigidbody *component.Rigidbody
-	transform *component.Transform
-}, error) {
-	t, err := s.componentManager.GetComponent(entity, ecs.ComponentType(component.TransformComponentType))
+func (s *PhysicsSystem) initEntity(entity entity.Entity) (*physicsEntity, error) {
+	t, err := s.componentRegistry.GetComponent(entity, component.TransformType)
 	if err != nil {
 		return nil, err
 	}
-	transform, ok := t.(*component.Transform)
+	transform, ok := t.(*transform.Transform)
 	if !ok {
-		return nil, fmt.Errorf("could not typecast component to *component.Transform")
+		return nil, fmt.Errorf("could not typecast component to Transform")
 	}
 
-	rb, err := s.componentManager.GetComponent(entity, ecs.ComponentType(component.RigidbodyComponentType))
+	rb, err := s.componentRegistry.GetComponent(entity, component.RigidbodyType)
 	if err != nil {
 		return nil, err
 	}
-	rigidbody, ok := rb.(*component.Rigidbody)
+	rigidbody, ok := rb.(*rigidbody.Rigidbody)
 	if !ok {
-		return nil, fmt.Errorf("could not typecast component to *component.Rigidbody")
+		return nil, fmt.Errorf("could not typecast component to Rigidbody")
 	}
-	//TODO: Add a test to assert that this function returns an error when the mass is not set and the type is dynamic.
+
 	if err := rigidbody.Init(); err != nil {
 		return nil, err
 	}
 
-	// TODO: Collision callbacks to ensure that the player does not glitch into walls.
 	shape := cp.NewBox(rigidbody.Body, 16, 16, 0)
 	rigidbody.Body.AddShape(shape)
 
@@ -89,16 +84,15 @@ func (s *PhysicsSystem) initEntity(entity ecs.Entity) (*struct {
 	rigidbody.Body.SetPosition(transform.Vector)
 
 	s.space.AddShape(shape)
-	return &struct {
-		rigidbody *component.Rigidbody
-		transform *component.Transform
-	}{
+	s.space.AddBody(rigidbody.Body)
+
+	return &physicsEntity{
 		rigidbody: rigidbody,
 		transform: transform,
 	}, nil
 }
 
-func (s *PhysicsSystem) EntityDestroyed(entity ecs.Entity) {
+func (s *PhysicsSystem) EntityDestroyed(entity entity.Entity) {
 	delete(s.entities, entity)
 }
 

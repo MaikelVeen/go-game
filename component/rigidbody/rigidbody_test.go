@@ -1,4 +1,4 @@
-package component
+package rigidbody
 
 import (
 	"testing"
@@ -14,7 +14,7 @@ func TestRigidbody_SetData(t *testing.T) {
 		data     map[string]interface{}
 		wantErr  bool
 		wantMass *float64
-		wantType RigidbodyType
+		wantType RidigbodyPhysicsType
 	}{
 		{
 			name: "should set mass and type correctly",

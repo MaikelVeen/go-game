@@ -1,4 +1,4 @@
-package component
+package spriterenderer
 
 import (
 	"fmt"
@@ -8,20 +8,18 @@ import (
 )
 
 const (
-	SpriteRenderComponentName       = "spriteRender"
-	SpriteRenderComponentType uint8 = 1
+	Type uint = 1
+	Slug      = "spriteRenderer"
 )
 
-var _ Component = (*SpriteRender)(nil)
-
-type SpriteRender struct {
+type SpriteRenderer struct {
 	SpriteSheet assets.SpriteSheet
 	// Dictates which sprite to render by default.
 	X, Y int
 }
 
 // SetData implements Component.
-func (s *SpriteRender) SetData(data map[string]any) error {
+func (s *SpriteRenderer) SetData(data map[string]any) error {
 	spriteSheetName, exists := data["spriteSheet"].(string)
 	if !exists {
 		return fmt.Errorf("could not set sprite render data: missing name")
@@ -48,6 +46,6 @@ func (s *SpriteRender) SetData(data map[string]any) error {
 	return nil
 }
 
-func (s *SpriteRender) GetSprite() *ebiten.Image {
+func (s *SpriteRenderer) GetSprite() *ebiten.Image {
 	return s.SpriteSheet.Sprite(s.X, s.Y)
 }

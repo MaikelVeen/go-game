@@ -5,7 +5,7 @@ entities:
         data:
           x: 100.0
           y: 150.0
-      - type: spriteRender
+      - type: spriteRenderer
         data:
           spriteSheet: playerSpriteSheet
           x: 1
@@ -24,7 +24,7 @@ entities:
         data:
           x: 0
           y: 0
-      - type: spriteRender
+      - type: spriteRenderer
         data:
           spriteSheet: trunk 
           x: 0

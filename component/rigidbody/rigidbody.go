@@ -1,4 +1,4 @@
-package component
+package rigidbody
 
 import (
 	"fmt"
@@ -6,23 +6,28 @@ import (
 	"github.com/jakecoffman/cp/v2"
 )
 
-// TODO: Replace with iota in components.go.
 const (
-	RigidbodyComponentName       = "rigidbody"
-	RigidbodyComponentType uint8 = 4
+	Type uint = 4
+	Slug      = "rigidbody"
 )
 
-var _ PhysicsComponent = (*Rigidbody)(nil)
-
-type RigidbodyType uint8
+// RidigbodyPhysicsType is an enum for the type of rigidbody.
+type RidigbodyPhysicsType uint8
 
 const (
-	RigidbodyTypeDynamic RigidbodyType = iota
+	// RigidbodyTypeDynamic is a rigidbody that moves and is affected by forces.
+	// It collides with all other rigidbodies.
+	RigidbodyTypeDynamic RidigbodyPhysicsType = iota
+	// RigidbodyTypeKinematic is a rigidbody that moves and is affected by forces but
+	// does not collide with other kinematic or static rigidbodies.
 	RigidbodyTypeKinematic
+	// RigidbodyTypeStatic is a rigidbody that does not move and is not affected by forces.
+	// It collides with all other rigidbodies.
 	RigidbodyTypeStatic
 )
 
-var RigidbodyTypeMapping = map[string]RigidbodyType{
+// RigidbodyTypeMapping maps strings to RidigbodyPhysicsType.
+var RigidbodyTypeMapping = map[string]RidigbodyPhysicsType{
 	"dynamic":   RigidbodyTypeDynamic,
 	"kinematic": RigidbodyTypeKinematic,
 	"static":    RigidbodyTypeStatic,
@@ -31,13 +36,11 @@ var RigidbodyTypeMapping = map[string]RigidbodyType{
 // Ridigbody wraps a Chipmunk body and implements PhysicsComponent.
 // The body is created when Init is called.
 type Rigidbody struct {
+	Type RidigbodyPhysicsType
 	*cp.Body
-	Type RigidbodyType
-
 	mass *float64
 }
 
-// Init implements PhysicsComponent.
 func (r *Rigidbody) Init() error {
 	switch r.Type {
 	case RigidbodyTypeDynamic:
@@ -55,7 +58,6 @@ func (r *Rigidbody) Init() error {
 	return nil
 }
 
-// SetData implements Component.
 func (r *Rigidbody) SetData(data map[string]interface{}) error {
 	massValue, massExists := data["mass"]
 	if massExists {

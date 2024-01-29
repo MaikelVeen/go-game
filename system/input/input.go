@@ -5,33 +5,33 @@ import (
 	"log/slog"
 
 	"github.com/MaikelVeen/go-game/component"
-	"github.com/MaikelVeen/go-game/ecs"
+	"github.com/MaikelVeen/go-game/component/playercontroller"
+	"github.com/MaikelVeen/go-game/component/rigidbody"
+	"github.com/MaikelVeen/go-game/entity"
 	"github.com/MaikelVeen/go-game/types"
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
-const SystemType ecs.SystemType = 0
-
-var _ ecs.System = &InputSystem{}
+const (
+	Type uint8 = 0
+	Slug       = "input"
+)
 
 type InputSystem struct {
-	componentManager *ecs.ComponentManager
-	entities         map[ecs.Entity]struct{}
-
-	currentDirection *types.Vector2
+	componentRegistry *component.Registry
+	entities          map[entity.Entity]struct{}
+	currentDirection  *types.Vector2
 }
 
 // New returns a new InputSystem.
-func New(cm *ecs.ComponentManager) *InputSystem {
+func New(componentRegistry *component.Registry) *InputSystem {
 	return &InputSystem{
-		componentManager: cm,
-		entities:         make(map[ecs.Entity]struct{}),
-		currentDirection: &types.Vector2{},
+		componentRegistry: componentRegistry,
+		entities:          make(map[entity.Entity]struct{}),
 	}
 }
 
-func (s *InputSystem) AddEntity(entity ecs.Entity) error {
+func (s *InputSystem) AddEntity(entity entity.Entity) error {
 	if _, exists := s.entities[entity]; exists {
 		return nil
 	}
@@ -41,25 +41,12 @@ func (s *InputSystem) AddEntity(entity ecs.Entity) error {
 	return nil
 }
 
-func (s *InputSystem) EntityDestroyed(entity ecs.Entity) {
+func (s *InputSystem) EntityDestroyed(entity entity.Entity) {
 	delete(s.entities, entity)
 }
 
-// Draw implements ecs.System.
-func (s *InputSystem) Draw(screen *ebiten.Image) {
-	ebitenutil.DebugPrintAt(
-		screen,
-		fmt.Sprintf(
-			"Input direction X: %f, Y: %f",
-			s.currentDirection.X,
-			s.currentDirection.Y),
-		0,
-		15,
-	)
-}
+func (s *InputSystem) Draw(screen *ebiten.Image) {} // Noop.
 
-// Update implements ecs.System.
-//
 // Each iteration of the game loop, relevant player controllers
 // are updated with the current input direction and the rigidbody
 // is updated with the new velocity.
@@ -68,23 +55,23 @@ func (s *InputSystem) Update() error {
 
 	for entity := range s.entities {
 		// Get the player controller component.
-		pc, err := s.componentManager.GetComponent(entity, ecs.ComponentType(component.PlayerControllerType))
+		pc, err := s.componentRegistry.GetComponent(entity, component.PlayerControllerType)
 		if err != nil {
 			return err
 		}
-		playerController, ok := pc.(*component.PlayerController)
+		playerController, ok := pc.(*playercontroller.PlayerController)
 		if !ok {
 			return fmt.Errorf("could not typecast component to PlayerController")
 		}
 		speed := playerController.Speed
 
-		// TOOD: Should the input system be responsible for updatring the velocity of the rigidbody?
+		// TODO: Should the input system be responsible for updatring the velocity of the rigidbody?
 		// Get the rigidbody component.
-		rb, err := s.componentManager.GetComponent(entity, ecs.ComponentType(component.RigidbodyComponentType))
+		rb, err := s.componentRegistry.GetComponent(entity, component.RigidbodyType)
 		if err != nil {
 			return err
 		}
-		rigidbody, ok := rb.(*component.Rigidbody)
+		rigidbody, ok := rb.(*rigidbody.Rigidbody)
 		if !ok {
 			return fmt.Errorf("could not typecast component to Rigidbody")
 		}
@@ -99,6 +86,7 @@ func (s *InputSystem) Update() error {
 		rigidbody.Body.SetForce(velocity)
 
 		// Apply drag to the current velocity.
+		// TODO Drag should be a property of the rigidbody.
 		dragFactor := 0.9
 		currentVelocity := rigidbody.Body.Velocity()
 		draggedVelocity := currentVelocity.Mult(dragFactor)

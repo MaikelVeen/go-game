@@ -1,7 +1,9 @@
-package ecs
+package system
 
 import (
 	"errors"
+
+	"github.com/MaikelVeen/go-game/entity"
 )
 
 var (
@@ -9,22 +11,22 @@ var (
 	ErrSystemNotRegistered     = errors.New("system not registered")
 )
 
-// SystemManager manages systems and their signatures
-type SystemManager struct {
-	systems    map[SystemType]System
-	signatures map[SystemType]Signature
+// Registry manages systems and their signatures
+type Registry struct {
+	systems    map[Type]System
+	signatures map[Type]entity.Signature
 }
 
-func NewSystemManager() *SystemManager {
-	return &SystemManager{
-		systems:    make(map[SystemType]System),
-		signatures: make(map[SystemType]Signature),
+func NewRegistry() *Registry {
+	return &Registry{
+		systems:    make(map[Type]System),
+		signatures: make(map[Type]entity.Signature),
 	}
 }
 
 // ForEachSystem iterates over all systems and calls the provided function.
 // If the function returns an error, the iteration is stopped and the error is returned.
-func (sm *SystemManager) ForEachSystem(fn func(System) error) error {
+func (sm *Registry) ForEachSystem(fn func(System) error) error {
 	for _, sys := range sm.systems {
 		if err := fn(sys); err != nil {
 			return err
@@ -37,7 +39,7 @@ func (sm *SystemManager) ForEachSystem(fn func(System) error) error {
 
 // RegisterSystem registers a system with the SystemManager.
 // Returns an error if the system is already registered.
-func (sm *SystemManager) RegisterSystem(sysType SystemType, sys System) error {
+func (sm *Registry) RegisterSystem(sysType Type, sys System) error {
 	if _, exists := sm.systems[sysType]; exists {
 		return ErrSystemAlreadyRegistered
 	}
@@ -48,7 +50,7 @@ func (sm *SystemManager) RegisterSystem(sysType SystemType, sys System) error {
 
 // SetSignature sets the signature for a system, this indicates which set of components
 // the system is interested in.
-func (sm *SystemManager) SetSignature(sysType SystemType, sig Signature) error {
+func (sm *Registry) SetSignature(sysType Type, sig entity.Signature) error {
 	if _, exists := sm.systems[sysType]; !exists {
 		return ErrSystemNotRegistered
 	}
@@ -58,14 +60,16 @@ func (sm *SystemManager) SetSignature(sysType SystemType, sig Signature) error {
 }
 
 // EntityDestroyed notifies all systems that an entity has been destroyed.
-func (sm *SystemManager) EntityDestroyed(entity Entity) {
+func (sm *Registry) EntityDestroyed(entity entity.Entity) {
 	for _, sys := range sm.systems {
 		sys.EntityDestroyed(entity)
 	}
 }
 
+// TODO: Entiry should be added if it contains all the components the system is interested in.
+// And not only when it contains an exact match of the system's signature.
 // EntitySignatureChanged notifies all systems that an entity's signature has changed.
-func (sm *SystemManager) EntitySignatureChanged(entity Entity, sig Signature) {
+func (sm *Registry) EntitySignatureChanged(entity entity.Entity, sig entity.Signature) {
 	for sysType, sys := range sm.systems {
 		systemSignature := sm.signatures[sysType]
 

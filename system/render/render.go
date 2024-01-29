@@ -4,46 +4,41 @@ import (
 	"log/slog"
 
 	"github.com/MaikelVeen/go-game/component"
-	"github.com/MaikelVeen/go-game/ecs"
+	"github.com/MaikelVeen/go-game/component/spriterenderer"
+	"github.com/MaikelVeen/go-game/component/transform"
+	"github.com/MaikelVeen/go-game/entity"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-const SystemType ecs.SystemType = 2
-
-var _ ecs.System = &RenderSystem{}
+const (
+	Type uint8 = 2
+	Slug       = "render"
+)
 
 type RenderSystem struct {
-	componentManager *ecs.ComponentManager
-	entities         map[ecs.Entity]struct{}
+	componentRegistry *component.Registry
+
+	entities map[entity.Entity]struct{}
 
 	// offScreenImage is the image that is rendered to by the RenderSystem.
 	// This image is then scaled and drawn to the screen.
 	offScreenImage *ebiten.Image
-
-	// scaleFactor is the factor by which the offScreenImage is scaled.
-	scaleFactor float64
 }
 
 // New returns a new RenderSystem.
-func New(
-	cm *ecs.ComponentManager,
-	offScreenImage *ebiten.Image,
-	scale float64,
-) *RenderSystem {
+func New(componentRegistry *component.Registry, offscreenImage *ebiten.Image) *RenderSystem {
 	return &RenderSystem{
-		componentManager: cm,
-		entities:         make(map[ecs.Entity]struct{}),
-		offScreenImage:   offScreenImage,
-		scaleFactor:      scale,
+		componentRegistry: componentRegistry,
+		offScreenImage:    offscreenImage,
+		entities:          make(map[entity.Entity]struct{}),
 	}
 }
 
-// Init implements ecs.System.
 func (s *RenderSystem) Init() error {
 	return nil
 }
 
-func (s *RenderSystem) AddEntity(entity ecs.Entity) error {
+func (s *RenderSystem) AddEntity(entity entity.Entity) error {
 	if _, exists := s.entities[entity]; exists {
 		return nil
 	}
@@ -53,7 +48,7 @@ func (s *RenderSystem) AddEntity(entity ecs.Entity) error {
 	return nil
 }
 
-func (s *RenderSystem) EntityDestroyed(entity ecs.Entity) {
+func (s *RenderSystem) EntityDestroyed(entity entity.Entity) {
 	delete(s.entities, entity)
 }
 
@@ -85,20 +80,26 @@ func getScreenSize() (int, int) {
 	return ebiten.WindowSize()
 }
 
-func drawEntity(s *RenderSystem, entity ecs.Entity) {
-	t, err := s.componentManager.GetComponent(entity, ecs.ComponentType(component.TransformComponentType))
+// TODO: Make this part of the RenderSystem.
+func drawEntity(s *RenderSystem, entity entity.Entity) {
+	t, err := s.componentRegistry.GetComponent(entity, component.TransformType)
 	if err != nil {
 		slog.Error("Failed to get Transform component", "entity", entity)
 		return
 	}
-	tranform := t.(*component.Transform)
+	tranform := t.(*transform.Transform)
 
-	spriteRender, err := s.componentManager.GetComponent(entity, ecs.ComponentType(component.SpriteRenderComponentType))
+	sr, err := s.componentRegistry.GetComponent(entity, component.SpriteRenderType)
 	if err != nil {
 		slog.Error(err.Error())
 		return
 	}
-	sr := spriteRender.(*component.SpriteRender)
+
+	spriteRenderer, ok := sr.(*spriterenderer.SpriteRenderer)
+	if !ok {
+		slog.Error("Failed to typecast SpriteRenderer component")
+		return
+	}
 
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(
@@ -106,5 +107,5 @@ func drawEntity(s *RenderSystem, entity ecs.Entity) {
 		tranform.Vector.Y,
 	)
 
-	s.offScreenImage.DrawImage(sr.GetSprite(), op)
+	s.offScreenImage.DrawImage(spriteRenderer.GetSprite(), op)
 }

@@ -1,4 +1,4 @@
-package component
+package spriterenderer
 
 import (
 	"testing"
@@ -64,7 +64,7 @@ func TestSpriteRender_SetData(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			sr := &SpriteRender{}
+			sr := &SpriteRenderer{}
 			err := sr.SetData(tt.args.data)
 			if tt.wantErr {
 				assert.Error(t, err)
